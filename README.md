@@ -94,9 +94,15 @@ Comments
 
 Functions (that can take multiple scalar arguments and return a single scalar result)
 -------------------------------------------------------------------------------------
-  
-\# myfunction(parameters): \n
-function body;  \n
-return();  \n
-;  \n
-|returning nothing|  
+\# myfunction(parameters):
+function body;
+return(x);
+;
+|returning an integer|
+
+\# myfunction2(parameters):
+function body;
+return();
+;
+|returning nothing|
+
