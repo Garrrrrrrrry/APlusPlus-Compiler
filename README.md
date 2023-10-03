@@ -1,12 +1,27 @@
 A++ README  
+==========
 
-Team Members:  
+Team Members: 
+-------------
 Gurman Dhaliwal gdhal005@ucr.edu gsinghd  
 James Glassford aglas012@ucr.edu jamesglassford15  
 Suhail-Anand Singh Dhillon sdhil026@ucr.edu DhillonSuhail  
 Kevin Pham kpham130@ucr.edu Kuvinn  
 
+Name of Language:  
+-----------------
+A++  
+
+Extension Given to Programs:  
+----------------------------
+[program name].aplusplus  
+
+Compiler Name:  
+--------------
+apc  
+
 Language features:  
+==================
 *note: brackets denote conditionals, parentheses denote order of operations  
 
 Integer scalar variables
@@ -79,14 +94,9 @@ Comments
 
 Functions (that can take multiple scalar arguments and return a single scalar result)
 -------------------------------------------------------------------------------------
+  
 \# myfunction(parameters):  
 function body;  
-return(x);  
-;
-|returning an integer|
-
-\# myfunction(parameters):
-function body;
-return();
-;
-|returning nothing|
+return();  
+;  
+|returning nothing|  
