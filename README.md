@@ -82,5 +82,11 @@ Functions (that can take multiple scalar arguments and return a single scalar re
 \# myfunction(parameters):  
 function body;  
 return(x);  
-;  
+;
+|returning an integer|
 
+\# myfunction(parameters):
+function body;
+return();
+;
+|returning nothing|
