@@ -7,6 +7,7 @@ Gurman Dhaliwal gdhal005@ucr.edu gsinghd
 James Glassford aglas012@ucr.edu jamesglassford15  
 Suhail-Anand Singh Dhillon sdhil026@ucr.edu DhillonSuhail  
 Kevin Pham kpham130@ucr.edu Kuvinn  
+Gary Zeng gzeng009@ucr.edu Garrrrrrrrry  
 
 Name of Language:  
 -----------------
