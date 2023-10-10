@@ -22,7 +22,7 @@ ALPHA   [A-Z]
 "mod"       { printf("%s\n", "modulo"); }
 "eq"        { printf("%s\n", "assign"); }
 ";"         { printf("%s\n", "semicolon"); }
-#{DIGIT}#   { printf("%s\n", "array_len"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s\n", yytext);}
+#{DIGIT}#   { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
 {ALPHA}     { printf("%s\n", yytext); }
 "#"         { printf("%s\n", "make_int"); }
 \n          { ++current_line; current_column = 0; }
