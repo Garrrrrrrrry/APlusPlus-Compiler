@@ -9,29 +9,29 @@
 |Missing Assignment statements|
 |x = 10;|
 
-|Missing Variable Arithmetic operators (e.g., “+”, “-”, “*”, “/”)|
-|x add y; |+||
-|x sub y; |-||
-|x pro y; |*||
-|x div y; |/||
-|x mod y; |%||
+|Arithmetic operators (e.g., “+”, “-”, “*”, “/”)|
+x add y; |+|
+x sub y; |-|
+x pro y; |*|
+x div y; |/|
+x mod y; |%|
 
-|x = (x add y) sub z;|
-(3 add 4) sub 1
+(x add y) sub z;
+(3 add 4) sub 1;
 
-|Missing Variable Relational operators (e.g., “<”, “==”, “>”, “!=”)|
-|x lt y; |<||
-|x eq y; |==||
-|x gt y; |>||
-|x ne y; |!=||
-|x leq y; |<=||
-|x geq y; |>=||
+|Relational operators (e.g., “<”, “==”, “>”, “!=”)|
+x lt y; |<|
+x eq y; |==|
+x gt y; |>|
+x ne y; |!=|
+x leq y; |<=|
+x geq y; |>=|
 
-|x and y; |&&||
-|x or y; | || ||
+x and y; |&&|
+x or y;  ||||
 
-|(x lt y) and (x gt z)|
-(3 lt 1) and (10 gt 4)
+(x lt y) and (x gt z);
+(3 lt 1) and (10 gt 4);
 
 |Missing While or Do-While loops|
 |when [x]:|

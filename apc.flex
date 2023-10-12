@@ -13,6 +13,8 @@ unsigned long long current_column = 0;
 
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
+ARITH_OP (add|sub|pro|div|mod)
+RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 /* lexing rules go down there */
 %%
 
@@ -25,6 +27,9 @@ ID [a-z][a-z0-9]*
 "("           { printf("%s\n", yytext); }
 ")"           { printf("%s\n", yytext); }
 
+"(".+")"([ \t]+{ARITH_OP}[ \t]*[a-zA-Z]+)?;     { printf("%s\n", yytext); }
+[a-zA-Z]+[ \t]*{ARITH_OP}[ \t]*[a-zA-Z]+;       { printf("%s\n", yytext); }
+
 "lt"          { printf("%s\n", "<"); }
 "eq"          { printf("%s\n", "="); }
 "gt"          { printf("%s\n", ">"); }
@@ -35,9 +40,12 @@ ID [a-z][a-z0-9]*
 "and"         { printf("%s\n", "&&"); }
 "or"          { printf("%s\n", "||"); }
 
+"(".+")"([ \t]+{RELAT_OP}[ \t]*[a-zA-Z]+)?;     { printf("%s\n", yytext); }
+[a-zA-Z]+[ \t]*{RELAT_OP}[ \t]*[a-zA-Z]+;       { printf("%s\n", yytext); }
+
 "stop"        { printf("%s\n", yytext); }
 
-#[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;     { printf("%s\n", yytext); }
+#[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
 "#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
 
 "|".*"|"    { printf("%s\n", yytext); }
