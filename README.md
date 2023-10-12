@@ -48,7 +48,7 @@ x pro y; |*|
 x div y; |/|  
 x mod y; |%|  
 
-x = (x add y) min z;  
+x = (x add y) sub z;  
 
 Relational operators (e.g., “<”, “==”, “>”, “!=”)
 -------------------------------------------------
