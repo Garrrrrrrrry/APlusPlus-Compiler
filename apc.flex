@@ -14,7 +14,6 @@ unsigned long long current_column = 0;
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
 INT [0-9]+
-STRING ([a-z]*[0-9]*)+ 
 /* lexing rules go down there */
 %%
 
