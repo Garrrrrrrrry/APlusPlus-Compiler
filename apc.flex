@@ -1,3 +1,4 @@
+
 %{
 // C code goes here
 #include <stdio.h>
@@ -32,6 +33,8 @@ ID [a-z][a-z0-9]*
 "geq"          { printf("%s\n", ">="); }
 
 "stop"      { printf("%s\n", yytext); }
+
+#{DIGIT}#   { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
 
 "#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
 
