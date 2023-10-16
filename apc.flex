@@ -45,6 +45,8 @@ RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 
 "stop"        { printf("%s\n", yytext); }
 
+#{DIGIT}#   { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
+
 #[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
 "#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
 
