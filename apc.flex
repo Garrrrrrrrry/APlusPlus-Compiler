@@ -13,7 +13,7 @@ unsigned long long current_column = 0;
 %option noyywrap
 
 DIGIT [0-9]
-ID [a-z][a-zA-Z0-9]*
+ID [a-zA-Z0-9]+
 INT [0-9]+
 ARITH_OP (add|sub|pro|div|mod)
 RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
@@ -37,8 +37,8 @@ ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 "}"           { printf("%s\n", yytext); }
 ","           { printf("%s\n", yytext); }
 
-"(".+")"([ \t]+{ARITH_OP}[ \t]*[a-zA-Z]+)?;     { printf("%s\n", yytext); }
-[a-zA-Z]+[ \t]*{ARITH_OP}[ \t]*[a-zA-Z]+;       { printf("%s\n", yytext); }
+"(".+")"([ \t]+{ARITH_OP}[ \t]*ID+)?;     { printf("%s\n", yytext); }
+ID+[ \t]*{ARITH_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 
 "lt"          { printf("%s\n", "<"); }
 "eq"          { printf("%s\n", "="); }
@@ -50,16 +50,21 @@ ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 "and"         { printf("%s\n", "&&"); }
 "or"          { printf("%s\n", "||"); }
 
-"(".+")"([ \t]+{RELAT_OP}[ \t]*[a-zA-Z]+)?;     { printf("%s\n", yytext); }
-[a-zA-Z]+[ \t]*{RELAT_OP}[ \t]*[a-zA-Z]+;       { printf("%s\n", yytext); }
+"(".+")"([ \t]+{RELAT_OP}[ \t]*ID+)?;     { printf("%s\n", yytext); }
+ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 
 "stop"        { printf("%s\n", yytext); }
 
 "when ["{ID}"]:" { printf("%s\n", "while loop"); }
 
+{ID}+#{DIGIT}+#;      { printf("%s\n", yytext); }
+{ID}+#{ID}+#;      { printf("%s\n", yytext); }
+#{ID}+#             { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext);}
+#{ID}+[ \t]*{ARITH_OP}[ \t]*{ID}+#             { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext);}
+
 #{DIGIT}*#                { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
-#{DIGIT}+#[ \t][a-zA-Z]+; { printf("%s\n", yytext); }
-[a-zA-Z]+#{DIGIT}+#;      { printf("%s\n", yytext); }
+#{DIGIT}+#[ \t]ID+; { printf("%s\n", yytext); }
+#{ID}+#[ \t]ID+; { printf("%s\n", yytext); }
 
 "?"             {printf("IF %s\n", yytext);}
 "["             {printf("START CONDITIONAL %%s\n", yytext);}
@@ -71,10 +76,11 @@ ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 "aout"          {printf("WRITE OUT %s\n", yytext);}
 
 "return"        {printf("%s\n", yytext);}
+"return()"        {printf("%s\n", yytext);}
 
 {ID}+             {printf("ID %s\n", yytext);}
 
-#[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
+#[ ]+ID(,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
 "#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
 
 "|".*"|"    { printf("%s\n", yytext); }
