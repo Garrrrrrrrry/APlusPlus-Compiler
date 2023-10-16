@@ -23,6 +23,8 @@ RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 ID+[ \t]+"="[ \t]+{DIGIT}+;   { printf("%s\n", yytext); }
 ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 
+"="           { printf("%s\n", yytext); }
+
 {DIGIT}+      { printf("INT %d\n", atoi(yytext)); }
 "add"         { printf("%s\n", "+"); }
 "sub"         { printf("%s\n", "-"); }
@@ -79,7 +81,7 @@ ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 
 ";"         { printf("%s\n", yytext); }
 \n          { ++current_line; current_column = 0; }
-[ *\t*\r*]     /* NOP */
+[ \t*\r*]     /* NOP */
 .           {
                 // note: fprintf(stderr, ""); more traditional for error reporting
                 printf("problem at line %llu, col %llu\n", current_line, current_column);
