@@ -31,9 +31,9 @@ Integer scalar variables
 \# x, y;
 
 One-dimensional arrays of integers
------------------------------------
-## x; |for arrays of undefined size|  
-#10# x; |for array of size 10|  
+-----------------------------------        
+\## x; |for arrays of undefined size|  
+\#10# x; |for array of size 10|  
 x#1#; |to access element with index of 1|  
 
 
