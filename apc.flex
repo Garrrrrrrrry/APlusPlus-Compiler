@@ -56,6 +56,19 @@ RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 #{DIGIT}+#[ \t][a-zA-Z]+; { printf("%s\n", yytext); }
 [a-zA-Z]+#{DIGIT}+#;      { printf("%s\n", yytext); }
 
+"?"             {printf("IF %s\n", yytext);}
+"["             {printf("START CONDITIONAL %%s\n", yytext);}
+"]"             {printf("END CONDITIONAL %s\n", yytext);}
+":"             {printf("%s\n", yytext);}
+">"             {printf("ELSE IF %s\n", yytext);}
+
+"ain"           {printf("READ IN %s\n", yytext);}
+"aout"          {printf("WRITE OUT %s\n", yytext);}
+
+"return"        {printf("%s\n", yytext);}
+
+{ID}+             {printf("ID %s\n", yytext);}
+
 #[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
 "#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
 
