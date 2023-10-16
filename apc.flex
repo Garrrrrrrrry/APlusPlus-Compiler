@@ -2,6 +2,7 @@
 // C code goes here
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 FILE* input_file;
 
 unsigned long long current_line = 1;
@@ -13,10 +14,14 @@ unsigned long long current_column = 0;
 
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
+INT [0-9]+
 ARITH_OP (add|sub|pro|div|mod)
 RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 /* lexing rules go down there */
 %%
+
+[a-zA-Z]+[ \t]+"="[ \t]+{DIGIT}+;   { printf("%s\n", yytext); }
+[a-zA-Z]+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 
 {DIGIT}+      { printf("INT %d\n", atoi(yytext)); }
 "add"         { printf("%s\n", "+"); }
@@ -45,7 +50,11 @@ RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 
 "stop"        { printf("%s\n", yytext); }
 
-#{DIGIT}#   { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
+"when ["{ID}"]:" { printf("%s\n", "while loop"); }
+
+#{DIGIT}#                { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
+#{DIGIT}+#[ \t][a-zA-Z]+; { printf("%s\n", yytext); }
+[a-zA-Z]+#{DIGIT}+#;      { printf("%s\n", yytext); }
 
 #[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
 "#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
@@ -75,7 +84,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    input_file = fopen("working_tests.txt", "r");
+    input_file = fopen("full_tests.txt", "r");
     if(input_file == NULL){
         fprintf(stderr, "ERROR: file not open");
         return 1;

@@ -3,8 +3,10 @@
 # x, y;
 
 |One-dimensional arrays of integers|
-#10# x; |for array of size 10|
-x#1#; |to access element with index of 1|
+|for array of size 10|
+#10# x;
+|to access element with index of 1|
+x#1#;
 
 |Assignment statements|
 x = 10;
@@ -33,7 +35,7 @@ x or y; | || |
 
 |While or Do-While loops|
 when [x]:
-do whatever;
+|do whatever|;
 ;
 
 |Break statement|
