@@ -13,6 +13,7 @@ unsigned long long current_column = 0;
 
 DIGIT [0-9]
 ID [a-z][a-z0-9]*
+INT [0-9]+
 /* lexing rules go down there */
 %%
 
@@ -33,6 +34,7 @@ ID [a-z][a-z0-9]*
 "geq"          { printf("%s\n", ">="); }
 
 "stop"      { printf("%s\n", yytext); }
+"while ["{ID}"]:" { printf("%s\n", "while loop"); } 
 
 #{DIGIT}#   { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
 
