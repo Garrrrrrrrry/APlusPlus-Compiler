@@ -57,8 +57,8 @@ ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 
 "when ["{ID}"]:" { printf("%s\n", "while loop"); }
 
-{ID}+#{DIGIT}+#;      { printf("%s\n", yytext); }
-{ID}+#{ID}+#;      { printf("%s\n", yytext); }
+{ID}+#{DIGIT}+#;      { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); yytext++; printf("%s\n", yytext); }
+{ID}+#{ID}+#;      {printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext); }
 #{ID}+#             { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext);}
 #{ID}+[ \t]*{ARITH_OP}[ \t]*{ID}+#             { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext);}
 
