@@ -55,7 +55,7 @@ ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 
 "stop"        { printf("%s\n", yytext); }
 
-"when ["{ID}"]:" { printf("%s\n", "while loop"); }
+"when"       { printf("%s\n", "while loop"); }
 
 {ID}+#{DIGIT}+#;      { printf("%s\n", yytext); }
 {ID}+#{ID}+#;      { printf("%s\n", yytext); }
