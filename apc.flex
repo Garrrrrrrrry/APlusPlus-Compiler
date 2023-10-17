@@ -88,9 +88,11 @@ ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 ";"         { printf("%s\n", yytext); }
 \n          { ++current_line; current_column = 0; }
 [ \t*\r*]     /* NOP */
+
+{ID}*[^{ID}]{ID}+   {printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate();}
 .           {
                 // note: fprintf(stderr, ""); more traditional for error reporting
-                printf("problem at line %llu, col %llu\n", current_line, current_column);
+                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
                 yyterminate();
             }
 
