@@ -17,6 +17,7 @@ ID [a-zA-Z0-9]+
 INT [0-9]+
 ARITH_OP (add|sub|pro|div|mod)
 RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
+PUNCT   (;|,)
 /* lexing rules go down there */
 %%
 
@@ -89,7 +90,7 @@ ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 \n          { ++current_line; current_column = 0; }
 [ \t*\r*]     /* NOP */
 
-{ID}*[^{ID}]{ID}+   {printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate();}
+{ID}*[^{ID}^[PUNCT]]{ID}+   {printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate();}
 .           {
                 // note: fprintf(stderr, ""); more traditional for error reporting
                 printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
