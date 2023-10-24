@@ -13,89 +13,55 @@ unsigned long long current_column = 0;
 %option noyywrap
 
 DIGIT [0-9]
-ID [a-zA-Z0-9]+
-INT [0-9]+
-ARITH_OP (add|sub|pro|div|mod)
-RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
-PUNCT   (;|,)
+ID [a-zA-Z]
+
 /* lexing rules go down there */
 %%
 
-ID+[ \t]+"="[ \t]+{DIGIT}+;   { printf("%s\n", yytext); }
-ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
+{DIGIT}+                    { printf("INT %s\n", yytext); }
+"#"                         { printf("DEC %s\n", yytext); }
+"="                         { printf("ASSIGNMENT %s\n", yytext); }
+";"                         { printf("SEMICOLON %s\n", yytext); }
+"add"                       { printf("ADD %s\n", yytext); }
+"sub"                       { printf("SUB %s\n", yytext); }
+"pro"                       { printf("MULT %s\n", yytext); }
+"div"                       { printf("DIV %s\n", yytext); }
+"mod"                       { printf("MOD %s\n", yytext); }
+"("                         { printf("L_P %s\n", yytext); }
+")"                         { printf("R_P %s\n", yytext); }
+"{"                         { printf("L_CB %s\n", yytext); }
+"}"                         { printf("R_CB %s\n", yytext); }
+","                         { printf("COMMA %s\n", yytext); }
+"lt"                        { printf("LT %s\n", yytext); }
+"eq"                        { printf("EQ %s\n", yytext); }
+"gt"                        { printf("GT %s\n", yytext); }
+"ne"                        { printf("NE %s\n", yytext); }
+"leq"                       { printf("LEQ %s\n", yytext); }
+"geq"                       { printf("GEQ %s\n", yytext); }
+"and"                       { printf("AND %s\n", yytext); }
+"or"                        { printf("OR %s\n", yytext); }
+"stop"                      { printf("BREAK%s\n", yytext); }
+"when"                      { printf("WHILE%s\n", yytext); }
+"?"                         { printf("IF %s\n", yytext); }
+"["                         { printf("S_COND %s\n", yytext); }
+"]"                         { printf("E_COND %s\n", yytext); }
+":"                         { printf("GROUPING %s\n", yytext); }
+">"                         { printf("ELIF %s\n", yytext); }
+"ain"                       { printf("RIN %s\n", yytext); }
+"aout"                      { printf("ROUT %s\n", yytext); }
+"return"                    { printf("RETURN %s\n", yytext); }
+"|".*"|"                    { printf("COMMENT %s\n", yytext); }
+{ID}+                       { printf("ID %s\n", yytext); }
 
-"="           { printf("%s\n", yytext); }
+\n                          { ++current_line; current_column = 0; }
+[ \t*\r*]                   /* NOP */
 
-{DIGIT}+      { printf("INT %d\n", atoi(yytext)); }
-"add"         { printf("%s\n", "+"); }
-"sub"         { printf("%s\n", "-"); }
-"pro"         { printf("%s\n", "*"); }
-"div"         { printf("%s\n", "/"); }
-"mod"         { printf("%s\n", "%"); }
-"("           { printf("%s\n", yytext); }
-")"           { printf("%s\n", yytext); }
-"{"           { printf("%s\n", yytext); }
-"}"           { printf("%s\n", yytext); }
-","           { printf("%s\n", yytext); }
-
-"(".+")"([ \t]+{ARITH_OP}[ \t]*ID+)?;     { printf("%s\n", yytext); }
-ID+[ \t]*{ARITH_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
-
-"lt"          { printf("%s\n", "<"); }
-"eq"          { printf("%s\n", "="); }
-"gt"          { printf("%s\n", ">"); }
-"ne"          { printf("%s\n", "!="); }
-"leq"         { printf("%s\n", "<="); }
-"geq"         { printf("%s\n", ">="); }
-
-"and"         { printf("%s\n", "&&"); }
-"or"          { printf("%s\n", "||"); }
-
-"(".+")"([ \t]+{RELAT_OP}[ \t]*ID+)?;     { printf("%s\n", yytext); }
-ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
-
-"stop"        { printf("%s\n", yytext); }
-
-"when ["{ID}"]:" { printf("%s\n", "while loop"); }
-
-{ID}+#{DIGIT}+#;      { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); yytext++; printf("%s\n", yytext); }
-{ID}+#{ID}+#;      {printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext); }
-#{ID}+#             { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext);}
-#{ID}+[ \t]*{ARITH_OP}[ \t]*{ID}+#             { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "index: "); printf("%s\n", yytext);}
-
-#{DIGIT}*#                { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
-#{DIGIT}+#[ \t]ID+; { printf("%s\n", yytext); }
-#{ID}+#[ \t]ID+; { printf("%s\n", yytext); }
-
-"?"             {printf("IF %s\n", yytext);}
-"["             {printf("START CONDITIONAL %%s\n", yytext);}
-"]"             {printf("END CONDITIONAL %s\n", yytext);}
-":"             {printf("%s\n", yytext);}
-">"             {printf("ELSE IF %s\n", yytext);}
-
-"ain"           {printf("READ IN %s\n", yytext);}
-"aout"          {printf("WRITE OUT %s\n", yytext);}
-
-"return"        {printf("%s\n", yytext);}
-"return()"        {printf("%s\n", yytext);}
-
-{ID}+             {printf("ID %s\n", yytext);}
-
-#[ ]+ID(,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
-"#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
-
-"|".*"|"    { printf("%s\n", yytext); }
-
-";"         { printf("%s\n", yytext); }
-\n          { ++current_line; current_column = 0; }
-[ \t*\r*]     /* NOP */
-
-{ID}*[^{ID}^[PUNCT]]{ID}+   {printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate();}
-.           {
-                // note: fprintf(stderr, ""); more traditional for error reporting
-                printf("problem at line %llu, col %llu\n", current_line, current_column);
-                yyterminate();
-            }
+{ID}*[^{ID}^[PUNCT]]{ID}+   { printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate(); }
+.                           {
+                                // note: fprintf(stderr, ""); more traditional for error reporting
+                                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
+                                yyterminate();
+                            }
 
 %%
 
