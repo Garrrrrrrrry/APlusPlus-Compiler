@@ -8,6 +8,9 @@ FILE* input_file;
 unsigned long long current_line = 1;
 unsigned long long current_column = 0;
 #define YY_USER_ACTION current_column += yyleng;
+
+#include "y.tab.c"
+
 %}
 
 %option noyywrap
@@ -24,37 +27,37 @@ PUNCT   (;|,)
 ID+[ \t]+"="[ \t]+{DIGIT}+;   { printf("%s\n", yytext); }
 ID+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
 
-"="           { printf("%s\n", yytext); }
+"="           { return ASSIGNMENT; }
 
-{DIGIT}+      { printf("INT %d\n", atoi(yytext)); }
-"add"         { printf("%s\n", "+"); }
-"sub"         { printf("%s\n", "-"); }
-"pro"         { printf("%s\n", "*"); }
-"div"         { printf("%s\n", "/"); }
-"mod"         { printf("%s\n", "%"); }
-"("           { printf("%s\n", yytext); }
-")"           { printf("%s\n", yytext); }
-"{"           { printf("%s\n", yytext); }
-"}"           { printf("%s\n", yytext); }
-","           { printf("%s\n", yytext); }
+{DIGIT}+      { yylval.um = atoi(yytext); return INT; }
+"add"         { return ADD; }
+"sub"         { return SUB; }
+"pro"         { return PRO; }
+"div"         { return DIV; }
+"mod"         { return MOD; }
+"("           { return L_P; }
+")"           { return R_P; }
+"{"           { return L_CB; }
+"}"           { return R_CB; }
+","           { return COMMA; }
 
 "(".+")"([ \t]+{ARITH_OP}[ \t]*ID+)?;     { printf("%s\n", yytext); }
 ID+[ \t]*{ARITH_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 
-"lt"          { printf("%s\n", "<"); }
-"eq"          { printf("%s\n", "="); }
-"gt"          { printf("%s\n", ">"); }
-"ne"          { printf("%s\n", "!="); }
-"leq"         { printf("%s\n", "<="); }
-"geq"         { printf("%s\n", ">="); }
+"lt"          { return LT; }
+"eq"          { return EQ; }
+"gt"          { return GT; }
+"ne"          { return NE; }
+"leq"         { return LEQ; }
+"geq"         { return GEQ; }
 
-"and"         { printf("%s\n", "&&"); }
-"or"          { printf("%s\n", "||"); }
+"and"         { return AND; }
+"or"          { return OR; }
 
 "(".+")"([ \t]+{RELAT_OP}[ \t]*ID+)?;     { printf("%s\n", yytext); }
 ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 
-"stop"        { printf("%s\n", yytext); }
+"stop"        { return BREAK; }
 
 "when ["{ID}"]:" { printf("%s\n", "while loop"); }
 
@@ -70,8 +73,8 @@ ID+[ \t]*{RELAT_OP}[ \t]*ID+;       { printf("%s\n", yytext); }
 "?"             {printf("IF %s\n", yytext);}
 "["             {printf("START CONDITIONAL %%s\n", yytext);}
 "]"             {printf("END CONDITIONAL %s\n", yytext);}
-":"             {printf("%s\n", yytext);}
-">"             {printf("ELSE IF %s\n", yytext);}
+":"             { return GROUPING; }
+">"             { return ELIF; }
 
 "ain"           {printf("READ IN %s\n", yytext);}
 "aout"          {printf("WRITE OUT %s\n", yytext);}
@@ -120,7 +123,8 @@ int main(int argc, char **argv) {
     //perform lexing
     //comment out yyin for manual input
 //    yyin = input_file;
-    yylex();
+//    yylex();
+      yyparse();
 //    fclose(input_file);
 
     return 0;
