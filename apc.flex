@@ -21,40 +21,40 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+                    { printf("INT %s\n", yytext); }
-"#"                         { printf("DEC %s\n", yytext); }
-"="                         { printf("ASSIGNMENT %s\n", yytext); }
-";"                         { printf("SEMICOLON %s\n", yytext); }
-"add"                       { printf("ADD %s\n", yytext); }
-"sub"                       { printf("SUB %s\n", yytext); }
-"pro"                       { printf("MULT %s\n", yytext); }
-"div"                       { printf("DIV %s\n", yytext); }
-"mod"                       { printf("MOD %s\n", yytext); }
-"("                         { printf("L_P %s\n", yytext); }
-")"                         { printf("R_P %s\n", yytext); }
-"{"                         { printf("L_CB %s\n", yytext); }
-"}"                         { printf("R_CB %s\n", yytext); }
-","                         { printf("COMMA %s\n", yytext); }
-"lt"                        { printf("LT %s\n", yytext); }
-"eq"                        { printf("EQ %s\n", yytext); }
-"gt"                        { printf("GT %s\n", yytext); }
-"ne"                        { printf("NE %s\n", yytext); }
-"leq"                       { printf("LEQ %s\n", yytext); }
-"geq"                       { printf("GEQ %s\n", yytext); }
-"and"                       { printf("AND %s\n", yytext); }
-"or"                        { printf("OR %s\n", yytext); }
-"stop"                      { printf("BREAK%s\n", yytext); }
-"when"                      { printf("WHILE%s\n", yytext); }
-"?"                         { printf("IF %s\n", yytext); }
-"["                         { printf("S_COND %s\n", yytext); }
-"]"                         { printf("E_COND %s\n", yytext); }
-":"                         { printf("GROUPING %s\n", yytext); }
-">"                         { printf("ELIF %s\n", yytext); }
-"ain"                       { printf("RIN %s\n", yytext); }
-"aout"                      { printf("ROUT %s\n", yytext); }
-"return"                    { printf("RETURN %s\n", yytext); }
-"|".*"|"                    { printf("COMMENT %s\n", yytext); }
-{ID}+                       { printf("ID %s\n", yytext); }
+{DIGIT}+                    { return INT; }
+"#"                         { return DEC; }
+"="                         { return ASSIGNMENT; }
+";"                         { return SEMICOLON; }
+"add"                       { return ADD; }
+"sub"                       { return SUB; }
+"pro"                       { return MULT; }
+"div"                       { return DIV; }
+"mod"                       { return MOD; }
+"("                         { return L_P; }
+")"                         { return R_P; }
+"{"                         { return L_CB; }
+"}"                         { return R_CB; }
+","                         { return COMMA; }
+"lt"                        { return LT; }
+"eq"                        { return EQ; }
+"gt"                        { return GT; }
+"ne"                        { return NE; }
+"leq"                       { return LEQ; }
+"geq"                       { return GEQ; }
+"and"                       { return AND; }
+"or"                        { return OR; }
+"stop"                      { return BREAK; }
+"when"                      { return WHILE; }
+"?"                         { return IF; }
+"["                         { return S_COND; }
+"]"                         { return E_COND; }
+":"                         { return GROUPING; }
+">"                         { return ELIF; }
+"ain"                       { return RIN; }
+"aout"                      { return ROUT; }
+"return"                    { return RETURN; }
+"|".*"|"                    { return COMMENT; }
+{ID}+                       { return ID; }
 
 \n                          { ++current_line; current_column = 0; }
 [ \t*\r*]                   /* NOP */
