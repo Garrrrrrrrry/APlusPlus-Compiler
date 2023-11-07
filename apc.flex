@@ -32,8 +32,6 @@ ID [a-zA-Z]
 "mod"                       { return MOD; }
 "("                         { return L_P; }
 ")"                         { return R_P; }
-"{"                         { return L_CB; }
-"}"                         { return R_CB; }
 ","                         { return COMMA; }
 "lt"                        { return LT; }
 "eq"                        { return EQ; }
