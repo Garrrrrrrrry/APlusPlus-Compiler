@@ -8,67 +8,63 @@ FILE* input_file;
 unsigned long long current_line = 1;
 unsigned long long current_column = 0;
 #define YY_USER_ACTION current_column += yyleng;
+
+#include "y.tab.c"
+
 %}
 
 %option noyywrap
 
 DIGIT [0-9]
-ID [a-z][a-z0-9]*
-INT [0-9]+
-ARITH_OP (add|sub|pro|div|mod)
-RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
+ID [a-zA-Z]
+
 /* lexing rules go down there */
 %%
 
-[a-zA-Z]+[ \t]+"="[ \t]+{DIGIT}+;   { printf("%s\n", yytext); }
-[a-zA-Z]+[ \t]+"="[ \t]+            { printf("%s\n", yytext); }
+{DIGIT}+                    { return INT; }
+"#"                         { return DEC; }
+"="                         { return ASSIGNMENT; }
+";"                         { return SEMICOLON; }
+"add"                       { return ADD; }
+"sub"                       { return SUB; }
+"pro"                       { return MULT; }
+"div"                       { return DIV; }
+"mod"                       { return MOD; }
+"("                         { return L_P; }
+")"                         { return R_P; }
+"{"                         { return L_CB; }
+"}"                         { return R_CB; }
+","                         { return COMMA; }
+"lt"                        { return LT; }
+"eq"                        { return EQ; }
+"gt"                        { return GT; }
+"ne"                        { return NE; }
+"leq"                       { return LEQ; }
+"geq"                       { return GEQ; }
+"and"                       { return AND; }
+"or"                        { return OR; }
+"stop"                      { return BREAK; }
+"when"                      { return WHILE; }
+"?"                         { return IF; }
+"["                         { return S_COND; }
+"]"                         { return E_COND; }
+":"                         { return GROUPING; }
+">"                         { return ELIF; }
+"ain"                       { return RIN; }
+"aout"                      { return ROUT; }
+"return"                    { return RETURN; }
+"|"                         { return VERT_BAR; }
+{ID}+                       { return ID; }
 
-{DIGIT}+      { printf("INT %d\n", atoi(yytext)); }
-"add"         { printf("%s\n", "+"); }
-"sub"         { printf("%s\n", "-"); }
-"pro"         { printf("%s\n", "*"); }
-"div"         { printf("%s\n", "/"); }
-"mod"         { printf("%s\n", "%"); }
-"("           { printf("%s\n", yytext); }
-")"           { printf("%s\n", yytext); }
+\n                          { ++current_line; current_column = 0; }
+[ \t*\r*]                   /* NOP */
 
-"(".+")"([ \t]+{ARITH_OP}[ \t]*[a-zA-Z]+)?;     { printf("%s\n", yytext); }
-[a-zA-Z]+[ \t]*{ARITH_OP}[ \t]*[a-zA-Z]+;       { printf("%s\n", yytext); }
-
-"lt"          { printf("%s\n", "<"); }
-"eq"          { printf("%s\n", "="); }
-"gt"          { printf("%s\n", ">"); }
-"ne"          { printf("%s\n", "!="); }
-"leq"         { printf("%s\n", "<="); }
-"geq"         { printf("%s\n", ">="); }
-
-"and"         { printf("%s\n", "&&"); }
-"or"          { printf("%s\n", "||"); }
-
-"(".+")"([ \t]+{RELAT_OP}[ \t]*[a-zA-Z]+)?;     { printf("%s\n", yytext); }
-[a-zA-Z]+[ \t]*{RELAT_OP}[ \t]*[a-zA-Z]+;       { printf("%s\n", yytext); }
-
-"stop"        { printf("%s\n", yytext); }
-
-"when ["{ID}"]:" { printf("%s\n", "while loop"); }
-
-#{DIGIT}#                { printf("%s\n", "array"); yytext++; yytext[strlen(yytext)-1] = '\0'; printf("%s", "size: "); printf("%s\n", yytext);}
-#{DIGIT}+#[ \t][a-zA-Z]+; { printf("%s\n", yytext); }
-[a-zA-Z]+#{DIGIT}+#;      { printf("%s\n", yytext); }
-
-#[ ]+[a-zA-Z](,[ ]+[a-zA-Z ]+)?;   { printf("%s\n", yytext); }
-"#"[ \t\r]{ID}+        { printf("assign %s\n", yytext+2); } 
-
-"|".*"|"    { printf("%s\n", yytext); }
-
-";"         { printf("%s\n", yytext); }
-\n          { ++current_line; current_column = 0; }
-[ \t\r]     /* NOP */
-.           {
-                // note: fprintf(stderr, ""); more traditional for error reporting
-                printf("problem at line %llu, col %llu\n", current_line, current_column);
-                yyterminate();
-            }
+{ID}*[^{ID}^[PUNCT]]{ID}+   { printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate(); }
+.                           {
+                                // note: fprintf(stderr, ""); more traditional for error reporting
+                                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
+                                yyterminate();
+                            }
 
 %%
 
@@ -84,17 +80,18 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    input_file = fopen("full_tests.txt", "r");
-    if(input_file == NULL){
-        fprintf(stderr, "ERROR: file not open");
-        return 1;
-    }
+//    input_file = fopen("full_tests.txt", "r");
+//    if(input_file == NULL){
+//        fprintf(stderr, "ERROR: file not open");
+//        return 1;
+//    }
 
     //perform lexing
     //comment out yyin for manual input
-    yyin = input_file;
-    yylex();
-    fclose(input_file);
+//    yyin = input_file;
+//    yylex();
+      yyparse();
+//    fclose(input_file);
 
     return 0;
 }
