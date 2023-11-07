@@ -53,7 +53,7 @@ ID [a-zA-Z]
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
 "return"                    { return RETURN; }
-"|"                         { return VERT_BAR; }
+"|".*"|"                    { yylval.str = strdup(yytext); return COMMENT; }
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }

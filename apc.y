@@ -8,7 +8,7 @@
 
 %}
 
-%token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON VERT_BAR SPACES
+%token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON COMMENT
 %token DEC MULT L_CB R_CB COMMA LT GT NE LEQ GEQ AND OR BREAK IF ELIF RIN ROUT RETURN COMMENT ID
 
 %left ADD SUB MUL DIV EQ MOD
@@ -20,7 +20,7 @@
 
 %type<num> INT stmt mul_exp add_exp mod_exp exp
 
-%type<str> ID comments 
+%type<str> ID COMMENT
  
 %%
 
@@ -29,26 +29,7 @@ program: stmt {}
 
 stmt: add_exp ASSIGNMENT { printf("add_exp %d ASSIGNMENT\n", $1); } | WHILE S_COND add_exp EQ add_exp E_COND GROUPING { printf("WHILE CONDITIONAL %d EQ %d\n", $3, $5); } | SEMICOLON { printf("SEMICOLON\n");}
 
-stmt: VERT_BAR comments VERT_BAR { printf("|%s|\n", $2); }
-| VERT_BAR VERT_BAR { printf("||\n"); }
-
-WHITESPACE: " " | "\t"
-comments: ID { $$ = $1; }
-| ID comments { $$ = strcat($1, $2); }
-| INT {
-    char buffer[20];
-    sprintf(buffer, "%d", $1);
-    $$ = strdup(buffer);
-}
-| INT comments {
-    char buffer[20];
-    sprintf(buffer, "%d", $1);
-    $$ = strcat(strdup(buffer), $2);
-}
-| WHITESPACE { $$ = " "; }
-| WHITESPACE comments { 
-    $$ = strcat(" ", $2);
-}
+stmt: COMMENT { printf("%s\n", $1); }
 
 add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; }
 | add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3); $$ = $1 + $3; }
