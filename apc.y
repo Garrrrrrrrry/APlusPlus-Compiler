@@ -2,6 +2,8 @@
     #include <stdio.h>
 
     int yylex(void);
+    
+    int val;
 
     void yyerror(char const *err) {fprintf(stderr, "yyerror: %s\n", err); exit(-1); }
 
@@ -12,40 +14,37 @@
 %left ADD SUB MUL DIV MOD 
 %left AND OR LT EQ GT GEQ LEQ NE
 
-%union {
+%union{
     int num;
     char* str;
 }
 
-%type<num> INT stmt mul_exp add_exp mod_exp exp
- 
+%type<num> INT stmt mul_exp add_exp exp
+%type<str> ID mul_str
 %%
 
 program: stmt SEMICOLON { printf("program -> stmt SEMICOLON \n"); }
 | stmt SEMICOLON program { printf("program -> stmt SEMICOLON program \n"); }
 
-stmt: add_exp ASSIGNMENT { printf("add_exp %d ASSIGNMENT\n", $1); } 
-| WHILE S_COND add_exp EQ add_exp E_COND GROUPING { printf("WHILE CONDITIONAL %d EQ %d\n", $3, $5); }
+stmt: DEC mul_str {} 
+| WHILE S_COND add_exp EQ add_exp E_COND GROUPING { printf("WHILE CONDITIONAL %d EQ %d\n", $3, $5); } 
+| ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3); $$ = $3;}  //introduces shift/reduce conflict
+| add_exp SEMICOLON { printf("add_exp %d end stmt\n"), $1;} 
 
-add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; }
+add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; } //issue: we can't run input where (sub) pro because mul only multiplies exp
+| L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
 | add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3); $$ = $1 + $3; }
 | add_exp SUB add_exp { printf("add_exp %d SUB add_exp %d\n", $1, $3); $$ = $1 - $3; }
 
-mul_exp: mod_exp { printf("mul_exp %d: mod_exp\n", $1); $$ = $1; }
+mul_exp: exp { printf("mul_exp %d: exp\n", $1); $$ = $1; }
+| L_P mul_exp R_P { printf("L_P mul_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
 | mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3); $$ = $1 * $3; }
 | mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3); $$ = $1 / $3; }
+| mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); $$ = $1 % $3; }
 
-mod_exp: exp { printf("mod_exp %d: exp\n", $1); $$ = $1; } 
-| mod_exp MOD mod_exp { printf("mod_exp %d MOD mod_exp %d\n", $1, $3); $$ = $1 % $3; }
-
-exp: INT { printf("exp %d: INT\n", $1); $$ = $1; }  
+exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } //issue: cant pass up strings (yet!) so implement that tmrw morning
 | SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
 | L_P exp R_P { printf("L_P exp %d R_P\n", $2); $$ = $2; }
-
-
-statements:
-stmt SEMICOLON statements { printf("statements -> stmt SEMICOLON statements \n"); }
-| { printf("statements -> epsilon \n"); }
 
 cond: equality { printf("cond -> equality \n"); }
 | L_P cond R_P { printf("cond -> L_P cond R_P \n"); }
@@ -61,7 +60,7 @@ equality: add_exp { printf("equality -> add_exp \n"); }
 | add_exp GEQ add_exp { printf("equality -> add_exp GEQ add_exp \n"); }
 
 function_dec:
-DEC ID L_P param R_P GROUPING statements { printf("function_dec -> DEC ID L_P param R_P GROUPING statements \n"); }
+DEC ID L_P param R_P GROUPING statements { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
 
 function_call:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
@@ -80,5 +79,8 @@ RETURN L_P add_exp R_P { printf("return -> RETURN L_P add_exp R_P \n"); }
 array_dec: DEC add_exp DEC ID { printf("array_dec -> DEC add_exp DEC ID \n"); }
 
 array_access: ID DEC add_exp DEC { printf("array_access -> ID DEC add_exp DEC \n"); }
+
+mul_str: mul_str COMMA mul_str { printf("DEC mul_str %s COMMA mulstr %s\n", $1, $3);} //introduces shift/reduce conflict
+| ID { printf("DEC ID %s\n", $1);}
 
 %%
