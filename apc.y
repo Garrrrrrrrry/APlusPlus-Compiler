@@ -60,7 +60,7 @@ equality: add_exp { printf("equality -> add_exp \n"); }
 | add_exp GEQ add_exp { printf("equality -> add_exp GEQ add_exp \n"); }
 
 function_dec:
-DEC ID L_P param R_P GROUPING statements { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
+DEC ID L_P param R_P GROUPING program { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
 
 function_call:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
