@@ -16,16 +16,13 @@ unsigned long long current_column = 0;
 %option noyywrap
 
 DIGIT [0-9]
-ID [a-zA-Z0-9]+\.[a-zA-Z0-9]*
+ID [a-zA-Z]
 INT [0-9]+\.[0-9]*
 ARITH_OP (add|sub|pro|div|mod)
 RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
 STRING [a-z][a-zA-Z]+
 /* lexing rules go down there */
 %%
-
-{ID}           { yylval.id = strdup(yytext); return ID; }
-"="           { return EQ; }
 
 {DIGIT}+      { yylval.num = atoi(yytext); return NUM; }
 "add"         { return ADD; }
@@ -37,7 +34,7 @@ STRING [a-z][a-zA-Z]+
 ";"           { return SEMICOLON; }
 
 "lt"          { return LT; }
-"eq"          { return EQUIVALENT; }
+"eq"          { return EQ; }
 "gt"          { return GT; }
 "ne"          { return NE; }
 "leq"         { return LEQ; }
@@ -50,8 +47,6 @@ STRING [a-z][a-zA-Z]+
 ">[1]"          { return ELSE; }
 "ain"           { return READIN; }
 "aout"          { return READOUT; }
-"'"             { return STRING_EDGE_A; }
-\"              { return STRING_EDGE_B; }
 \n          { ++current_line; current_column = 0; }
 [ \t*\r*]     /* NOP */
 .           {
@@ -59,6 +54,7 @@ STRING [a-z][a-zA-Z]+
                 printf("problem at line %llu, col %llu\n", current_line, current_column);
                 yyterminate();
             }
+{ID}+         { yylval.str = strdup(yytext); return ID; }
 
 %%
 

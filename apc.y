@@ -11,8 +11,7 @@ void yyerror(char const *err) { fprintf(stderr, "yyerror: %s\n", err); exit(-1);
 
 
 
-%token NUM L_PAREN R_PAREN IF S_COND E_COND THEN SEMICOLON EQUIVALENT LT GT GEQ LEQ NE READIN READOUT ID STRING_EDGE_A STRING_EDGE_B ELSE 
-
+%token NUM L_PAREN R_PAREN IF S_COND E_COND THEN SEMICOLON EQUIVALENT LT GT GEQ LEQ NE READIN READOUT ELSE ID
 
 
 
@@ -21,33 +20,30 @@ void yyerror(char const *err) { fprintf(stderr, "yyerror: %s\n", err); exit(-1);
 
 %union {
     int num;
-    char* id;
+    char* str;
 }
 
 %type<num> NUM stmt add_exp mul_exp exp
-%type<id> ID
+%type<str> ID
 %%
 
 program: stmt {}
 | program stmt {}
 
 
-stmt: add_exp EQ{ }
+stmt: add_exp EQ{ printf("%d\n", $1); }
 | SEMICOLON { printf("semicolon\n"); }
 | if_else_stmt {  }
 | read {}
 
 
 read: read_out {}
+| read_in {}
 
-read_out: READOUT L_PAREN quote_handler R_PAREN { printf("Printing to command line\n"); }
+read_in: READIN L_PAREN stmt R_PAREN { printf("taking input from command line\n"); }
+
+read_out: READOUT L_PAREN ID R_PAREN { printf("Printing %s to command line\n", $3); }
 | READOUT L_PAREN NUM R_PAREN { printf("Printing %d to command line\n", $3); }
-
-quote_handler: STRING_EDGE_A read_type_handler STRING_EDGE_A {}
-| STRING_EDGE_B read_type_handler STRING_EDGE_B {}
-
-read_type_handler: ID {}
-| NUM {}
 
 if_else_stmt: if_stmt stmt else_stmt stmt
 
