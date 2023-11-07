@@ -3,7 +3,7 @@
 
     int yylex(void);
     
-    int var[26];
+    int val;
 
     void yyerror(char const *err) {fprintf(stderr, "yyerror: %s\n", err); exit(-1); }
 
@@ -19,30 +19,34 @@
 }
 
 %type<num> INT stmt mul_exp add_exp exp
-%type<str> ID
+%type<str> ID mul_str
 %%
 
 program: stmt {}
 | program stmt {}
 
-stmt: DEC ID {printf("DEC ID %s\n", $2);} 
+stmt: DEC mul_str {} 
 | WHILE S_COND add_exp EQ add_exp E_COND GROUPING { printf("WHILE CONDITIONAL %d EQ %d\n", $3, $5); } 
 | ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3); $$ = $3;}  //introduces shift/reduce conflict
 | add_exp SEMICOLON { printf("add_exp %d end stmt\n"), $1;} 
 | SEMICOLON { printf("SEMICOLON\n");}
 
-add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; }
+add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; } //issue: we can't run input where (sub) pro because mul only multiplies exp
 | L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
 | add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3); $$ = $1 + $3; }
 | add_exp SUB add_exp { printf("add_exp %d SUB add_exp %d\n", $1, $3); $$ = $1 - $3; }
 
 mul_exp: exp { printf("mul_exp %d: exp\n", $1); $$ = $1; }
+| L_P mul_exp R_P { printf("L_P mul_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
 | mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3); $$ = $1 * $3; }
 | mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3); $$ = $1 / $3; }
 | mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); $$ = $1 % $3; }
 
-exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } 
+exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } //issue: cant pass up strings (yet!) so implement that tmrw morning
 | SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
 | L_P exp R_P { printf("L_P exp %d R_P\n", $2); $$ = $2; }
+
+mul_str: mul_str COMMA mul_str { printf("DEC mul_str %s COMMA mulstr %s\n", $1, $3);} //introduces shift/reduce conflict
+| ID { printf("DEC ID %s\n", $1);}
 
 %%
