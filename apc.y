@@ -20,7 +20,7 @@
 
 %type<num> INT stmt mul_exp add_exp mod_exp exp
 
-%type<str> ID comments 
+%type<str> ID comments
  
 %%
 
@@ -28,8 +28,16 @@ program: stmt {}
 | program stmt {}
 
 stmt: add_exp ASSIGNMENT { printf("add_exp %d ASSIGNMENT\n", $1); } | WHILE S_COND add_exp EQ add_exp E_COND GROUPING { printf("WHILE CONDITIONAL %d EQ %d\n", $3, $5); } | SEMICOLON { printf("SEMICOLON\n");}
-| comments VERT_BAR { printf("%s |\n", $1); }
 
+stmt: VERT_BAR comments VERT_BAR { printf("|%s|\n", $2); }
+| VERT_BAR VERT_BAR { printf("||\n"); }
+
+comments: ID { $$ = $1; }
+| INT {
+    char buffer[20];
+    sprintf(buffer, "%d", $1);
+    $$ = strdup(buffer);
+}
 
 add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; }
 | add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3); $$ = $1 + $3; }
@@ -45,8 +53,5 @@ mod_exp: exp { printf("mod_exp %d: exp\n", $1); $$ = $1; }
 exp: INT { printf("exp %d: INT\n", $1); $$ = $1; }  
 | SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
 | L_P exp R_P { printf("L_P exp %d R_P\n", $2); $$ = $2; }
-
-comments: VERT_BAR ID { printf("| %s ", $2); }
-| VERT_BAR { printf("|"); }
 
 %%

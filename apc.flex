@@ -21,7 +21,7 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+                    { return INT; }
+{DIGIT}+                    { yylval.num = atoi(yytext); return INT; }
 "#"                         { return DEC; }
 "="                         { return ASSIGNMENT; }
 ";"                         { return SEMICOLON; }
@@ -54,7 +54,7 @@ ID [a-zA-Z]
 "aout"                      { return ROUT; }
 "return"                    { return RETURN; }
 "|"                         { return VERT_BAR; }
-{ID}+                       { return ID; }
+{ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
 [ \t*\r*]                   /* NOP */
