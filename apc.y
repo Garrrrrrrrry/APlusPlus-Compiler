@@ -32,15 +32,21 @@
 program: stmt SEMICOLON { printf("program -> stmt SEMICOLON \n"); }
 | stmt SEMICOLON program { printf("program -> stmt SEMICOLON program \n"); }
 
-stmts: {}
-| stmts stmt {}
+stmts : {}
+| stmts stmt SEMICOLON {}
 
 
 stmt: DEC mul_str {}
+<<<<<<< HEAD
 | DEC ID ASSIGNMENT add_exp SEMICOLON{printf("DEC ID %s ASSIGNMENT add_exp %d SEMICOLON\n",$2, $4);}
 | WHILE S_COND cond E_COND GROUPING { printf("WHILE CONDITIONAL\n"); } 
 | ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3);}  //introduces shift/reduce conflict
 | add_exp SEMICOLON { printf("add_exp %d end stmt\n");} 
+=======
+| DEC ID ASSIGNMENT add_exp {printf("DEC ID %s ASSIGNMENT add_exp \n",$2);}
+| WHILE S_COND cond E_COND GROUPING stmts { printf("WHILE CONDITIONAL\n"); } 
+| ID ASSIGNMENT add_exp {printf("ID %s ASSIGNMENT add_exp\n", $1); $$ = $3;}  //introduces shift/reduce conflict
+>>>>>>> de4bba9a4642a12d9583a609a641f8fdb1d0a633
 | if_else_stmt { }
 | read { }
 | function_call{}
@@ -49,6 +55,7 @@ stmt: DEC mul_str {}
 | array_dec{}
 | return{}
 
+<<<<<<< HEAD
 add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); } //issue: we can't run input where (sub) pro because mul only multiplies exp
 | L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); } //introduces shift/reduce conflict
 | add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3);}
@@ -59,10 +66,22 @@ mul_exp: exp { printf("mul_exp %d: exp\n", $1); $$ = $1; }
 | mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3);  }
 | mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3);  }
 | mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); }
+=======
+add_exp: mul_exp { printf("add_exp: mul_exp\n"); } //issue: we can't run input where (sub) pro because mul only multiplies exp
+| L_P add_exp R_P { printf("L_P add_exp R_P\n"); } //introduces shift/reduce conflict
+| add_exp ADD add_exp { printf("add_exp %s ADD add_exp\n", $1); }
+| add_exp SUB add_exp { printf("add_exp SUB add_exp \n"); }
 
-exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } //issue: cant pass up strings (yet!) so implement that tmrw morning
-| SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
-| L_P exp R_P { printf("L_P exp %d R_P\n", $2); $$ = $2; }
+mul_exp: exp { printf("mul_exp: exp\n"); $$ = $1; }
+| L_P mul_exp R_P { printf("L_P mul_exp R_P\n"); $$ = $2; } //introduces shift/reduce conflict
+| mul_exp MUL mul_exp { printf("mul_exp MUL mul_exp\n"); }
+| mul_exp DIV mul_exp { printf("mul_exp DIV mul_exp\n"); }
+| mul_exp MOD mul_exp { printf("mul_exp MOD mul_exp\n"); }
+>>>>>>> de4bba9a4642a12d9583a609a641f8fdb1d0a633
+
+exp: INT { printf("exp: INT\n"); $$ = $1; }
+| ID { printf("DEC ID %s\n", $1);}
+| L_P exp R_P { printf("L_P exp R_P\n"); $$ = $2; }
 
 cond: equality { printf("cond -> equality \n"); }
 | L_P cond R_P { printf("cond -> L_P cond R_P \n"); }
@@ -76,24 +95,7 @@ equality: add_exp { printf("equality -> add_exp \n"); }
 | add_exp NE add_exp { printf("equality -> add_exp NE add_exp \n"); }
 | add_exp LEQ add_exp { printf("equality -> add_exp LEQ add_exp \n"); }
 | add_exp GEQ add_exp { printf("equality -> add_exp GEQ add_exp \n"); }
-| ID LT ID { printf("equality -> ID LT ID \n"); }
-| ID EQ ID { printf("equality -> ID EQ ID \n"); }
-| ID GT ID { printf("equality -> ID GT ID \n"); }
-| ID NE ID { printf("equality -> ID NE ID \n"); }
-| ID LEQ ID { printf("equality -> ID LEQ ID \n"); }
-| ID GEQ ID { printf("equality -> ID GEQ ID \n"); }
-| ID LT add_exp { printf("equality -> ID LT add_exp \n"); }
-| ID EQ add_exp { printf("equality -> ID EQ add_exp \n"); }
-| ID GT add_exp { printf("equality -> ID GT add_exp \n"); }
-| ID NE add_exp { printf("equality -> ID NE add_exp \n"); }
-| ID LEQ add_exp { printf("equality -> ID LEQ add_exp \n"); }
-| ID GEQ add_exp { printf("equality -> ID GEQ add_exp \n"); }
-| add_exp LT ID { printf("equality -> add_exp LT ID \n"); }
-| add_exp EQ ID { printf("equality -> add_exp EQ ID \n"); }
-| add_exp GT ID { printf("equality -> add_exp GT ID \n"); }
-| add_exp NE ID { printf("equality -> add_exp NE ID \n"); }
-| add_exp LEQ ID { printf("equality -> add_exp LEQ ID \n"); }
-| add_exp GEQ ID { printf("equality -> add_exp GEQ ID \n"); }
+
 
 
 function_dec:
@@ -118,7 +120,7 @@ array_dec: DEC add_exp DEC ID { printf("array_dec -> DEC add_exp DEC ID \n"); }
 
 array_access: ID DEC add_exp DEC { printf("array_access -> ID DEC add_exp DEC \n"); }
 
-mul_str: mul_str COMMA mul_str { printf("DEC mul_str %s COMMA mulstr %s\n", $1, $3);} //introduces shift/reduce conflict
+mul_str: ID COMMA mul_str { printf("DEC ID %s\n", $1);} //introduces shift/reduce conflict
 | ID { printf("DEC ID %s\n", $1);}
 
 read: read_out {}

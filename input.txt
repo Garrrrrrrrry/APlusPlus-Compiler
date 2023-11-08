@@ -1,2 +1,19 @@
+<<<<<<< HEAD
 |Integer scalar variables|
 # x;
+=======
+#x;
+#t, y, z;
+#x = 5;
+x = 6;
+when [x lt 5]:
+#z;
+#a;
+;
+    when [n gt 1]:
+      c = a add b;
+      a = b;
+      b = c;
+      n = n sub 1;
+    ;
+>>>>>>> de4bba9a4642a12d9583a609a641f8fdb1d0a633
