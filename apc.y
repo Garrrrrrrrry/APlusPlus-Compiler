@@ -35,6 +35,7 @@ program: stmt SEMICOLON { printf("program -> stmt SEMICOLON \n"); }
 stmts: {}
 | stmts stmt {}
 
+
 stmt: DEC mul_str {}
 | DEC ID ASSIGNMENT add_exp SEMICOLON{printf("DEC ID %s ASSIGNMENT add_exp %d SEMICOLON\n",$2, $4);}
 | WHILE S_COND cond E_COND GROUPING { printf("WHILE CONDITIONAL\n"); } 
