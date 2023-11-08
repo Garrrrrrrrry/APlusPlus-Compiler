@@ -11,13 +11,9 @@
 
 %}
 
-<<<<<<< HEAD
-%token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON ID DEC RETURN COMMA MULT BREAK IF ELIF RIN ROUT ELSE
-=======
+
 
 %token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON ID DEC RETURN COMMA COMMENT MULT BREAK IF ELIF RIN ROUT ELSE
-
->>>>>>> origin/main
 
 %left ADD SUB MUL DIV MOD 
 %left AND OR LT EQ GT GEQ LEQ NE
@@ -27,11 +23,10 @@
     char* str;
 }
 
-<<<<<<< HEAD
-%type<num> INT stmt mul_exp add_exp exp equality
-=======
+
+
 %type<num> INT stmt mul_exp add_exp exp 
->>>>>>> origin/main
+
 
 %type<str> ID mul_str
  
@@ -103,13 +98,8 @@ equality: add_exp { printf("equality -> add_exp \n"); }
 | add_exp GEQ ID { printf("equality -> add_exp GEQ ID \n"); }
 
 
-<<<<<<< HEAD
-stmt:
-DEC ID L_P param R_P GROUPING program { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
-=======
 function_dec:
 DEC ID L_P param R_P GROUPING stmts SEMICOLON { printf("function_dec -> DEC ID L_P param R_P GROUPING \n"); }
->>>>>>> origin/main
 
 function_call:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
