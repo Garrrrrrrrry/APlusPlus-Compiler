@@ -9,8 +9,6 @@
 
 %}
 
-%define parse.error custom
-
 %token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON ID DEC RETURN COMMA COMMENT MULT BREAK IF ELIF RIN ROUT ELSE
 cond
 
@@ -114,18 +112,3 @@ else_stmt: ELSE GROUPING{ printf("Else, do something else.\n"); }
 |
 
 %%
-
-static int yyreport_syntax_error(const yypcontext_t *ctx) {
-    yysymbol_kind_t tokenCausingError = yypcontext_token(ctx);
-    yysymbol_kind_t expectedTokens[YYNTOKENS];
-    int INTExpectedTokens = yypcontext_expected_tokens(ctx, expectedTokens, YYNTOKENS);
-
-    fprintf(stderr, "\n-- Syntax Error --\n");
-    fprintf(stderr, "%llu line, %llu column\n", current_line, current_column);
-    fprintf(stderr, "Token causing error: %s\n", yysymbol_name(tokenCausingError));
-    for(int i = 0; i < INTExpectedTokens; ++i) {
-        fprintf(stderr, " expected token (%d/%d) %s\n", i+1, INTExpectedTokens, yysymbol_name(expectedTokens[i]));
-    }
-
-    return 0;
-}
