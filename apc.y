@@ -37,16 +37,9 @@ stmts : {}
 
 
 stmt: DEC mul_str {}
-<<<<<<< HEAD
-| DEC ID ASSIGNMENT add_exp SEMICOLON{printf("DEC ID %s ASSIGNMENT add_exp %d SEMICOLON\n",$2, $4);}
-| WHILE S_COND cond E_COND GROUPING { printf("WHILE CONDITIONAL\n"); } 
-| ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3);}  //introduces shift/reduce conflict
-| add_exp SEMICOLON { printf("add_exp %d end stmt\n");} 
-=======
 | DEC ID ASSIGNMENT add_exp {printf("DEC ID %s ASSIGNMENT add_exp \n",$2);}
 | WHILE S_COND cond E_COND GROUPING stmts { printf("WHILE CONDITIONAL\n"); } 
 | ID ASSIGNMENT add_exp {printf("ID %s ASSIGNMENT add_exp\n", $1); $$ = $3;}  //introduces shift/reduce conflict
->>>>>>> de4bba9a4642a12d9583a609a641f8fdb1d0a633
 | if_else_stmt { }
 | read { }
 | function_call{}
@@ -55,18 +48,6 @@ stmt: DEC mul_str {}
 | array_dec{}
 | return{}
 
-<<<<<<< HEAD
-add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); } //issue: we can't run input where (sub) pro because mul only multiplies exp
-| L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); } //introduces shift/reduce conflict
-| add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3);}
-| add_exp SUB add_exp { printf("add_exp %d SUB add_exp %d\n", $1, $3);  }
-
-mul_exp: exp { printf("mul_exp %d: exp\n", $1); $$ = $1; }
-| L_P mul_exp R_P { printf("L_P mul_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
-| mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3);  }
-| mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3);  }
-| mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); }
-=======
 add_exp: mul_exp { printf("add_exp: mul_exp\n"); } //issue: we can't run input where (sub) pro because mul only multiplies exp
 | L_P add_exp R_P { printf("L_P add_exp R_P\n"); } //introduces shift/reduce conflict
 | add_exp ADD add_exp { printf("add_exp %s ADD add_exp\n", $1); }
@@ -77,7 +58,6 @@ mul_exp: exp { printf("mul_exp: exp\n"); $$ = $1; }
 | mul_exp MUL mul_exp { printf("mul_exp MUL mul_exp\n"); }
 | mul_exp DIV mul_exp { printf("mul_exp DIV mul_exp\n"); }
 | mul_exp MOD mul_exp { printf("mul_exp MOD mul_exp\n"); }
->>>>>>> de4bba9a4642a12d9583a609a641f8fdb1d0a633
 
 exp: INT { printf("exp: INT\n"); $$ = $1; }
 | ID { printf("DEC ID %s\n", $1);}
