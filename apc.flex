@@ -21,19 +21,17 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+                    { return INT; }
+{DIGIT}+                    { yylval.num = atoi(yytext); return INT; }
 "#"                         { return DEC; }
 "="                         { return ASSIGNMENT; }
 ";"                         { return SEMICOLON; }
 "add"                       { return ADD; }
 "sub"                       { return SUB; }
-"pro"                       { return MULT; }
+"pro"                       { return MUL; }
 "div"                       { return DIV; }
 "mod"                       { return MOD; }
 "("                         { return L_P; }
 ")"                         { return R_P; }
-"{"                         { return L_CB; }
-"}"                         { return R_CB; }
 ","                         { return COMMA; }
 "lt"                        { return LT; }
 "eq"                        { return EQ; }
@@ -43,18 +41,18 @@ ID [a-zA-Z]
 "geq"                       { return GEQ; }
 "and"                       { return AND; }
 "or"                        { return OR; }
-"stop"                      { return BREAK; }
 "when"                      { return WHILE; }
-"?"                         { return IF; }
 "["                         { return S_COND; }
 "]"                         { return E_COND; }
 ":"                         { return GROUPING; }
+"?"                         { return IF; }
+"return"                    { return RETURN; }
 ">"                         { return ELIF; }
+">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
-"return"                    { return RETURN; }
-"|".*"|"                    { return COMMENT; }
-{ID}+                       { return ID; }
+"|".*"|"                    {  }
+{ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
 [ \t*\r*]                   /* NOP */
@@ -62,7 +60,7 @@ ID [a-zA-Z]
 {ID}*[^{ID}^[PUNCT]]{ID}+   { printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate(); }
 .                           {
                                 // note: fprintf(stderr, ""); more traditional for error reporting
-                                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
+                                fprintf(stderr,"lexer problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
                                 yyterminate();
                             }
 
