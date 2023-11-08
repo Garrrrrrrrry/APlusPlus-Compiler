@@ -12,3 +12,4 @@ when [x lt 5]:
       b = c;
       n = n sub 1;
     ;
+return c;
