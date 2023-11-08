@@ -25,5 +25,3 @@ x = (4 add 7) sub 8;
 |While or Do-While loops|
 |do whatever|
 |Break statement|
-|If-then-else statements|
-return()

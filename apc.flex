@@ -27,7 +27,7 @@ ID [a-zA-Z]
 ";"                         { return SEMICOLON; }
 "add"                       { return ADD; }
 "sub"                       { return SUB; }
-"pro"                       { return MULT; }
+"pro"                       { return MUL; }
 "div"                       { return DIV; }
 "mod"                       { return MOD; }
 "("                         { return L_P; }
@@ -41,18 +41,18 @@ ID [a-zA-Z]
 "geq"                       { return GEQ; }
 "and"                       { return AND; }
 "or"                        { return OR; }
-"stop"                      { return BREAK; }
 "when"                      { return WHILE; }
-"?"                         { return IF; }
 "["                         { return S_COND; }
 "]"                         { return E_COND; }
 ":"                         { return GROUPING; }
+"?"                         { return IF; }
+"return"                    { return RETURN; }
 ">"                         { return ELIF; }
 ">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
 "return"                    { return RETURN; }
-"|".*"|"                    { yylval.str = strdup(yytext); return COMMENT; }
+"|".*"|"                    /* NOP */
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
