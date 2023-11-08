@@ -1,6 +1,6 @@
 %{
     #include <stdio.h>
-
+    #include <stdlib.h>
     int yylex(void);
     
     int val;
@@ -9,7 +9,8 @@
 
 %}
 
-%token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON ID DEC RETURN COMMA
+%token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON ID DEC RETURN COMMA COMMENT MULT BREAK IF ELIF RIN ROUT
+cond
 
 %left ADD SUB MUL DIV MOD 
 %left AND OR LT EQ GT GEQ LEQ NE
@@ -20,8 +21,12 @@
 }
 
 %type<num> INT stmt mul_exp add_exp exp
-%type<str> ID mul_str
+
+%type<str> ID COMMENT mul_str
+ 
 %%
+
+program: COMMENT { printf("%s\n", $1); }
 
 program: stmt SEMICOLON { printf("program -> stmt SEMICOLON \n"); }
 | stmt SEMICOLON program { printf("program -> stmt SEMICOLON program \n"); }
@@ -46,7 +51,7 @@ exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } //issue: cant pass up strings
 | SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
 | L_P exp R_P { printf("L_P exp %d R_P\n", $2); $$ = $2; }
 
-cond: equality { printf("cond -> equality \n"); }
+program: equality { printf("cond -> equality \n"); }
 | L_P cond R_P { printf("cond -> L_P cond R_P \n"); }
 | cond OR cond { printf("cond -> cond OR cond \n"); }
 | cond AND cond { printf("cond -> cond AND cond \n"); }
@@ -59,10 +64,10 @@ equality: add_exp { printf("equality -> add_exp \n"); }
 | add_exp LEQ add_exp { printf("equality -> add_exp LEQ add_exp \n"); }
 | add_exp GEQ add_exp { printf("equality -> add_exp GEQ add_exp \n"); }
 
-function_dec:
+program:
 DEC ID L_P param R_P GROUPING program { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
 
-function_call:
+program:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
 
 param: { printf("param -> epsilon \n"); }
@@ -72,13 +77,13 @@ param: { printf("param -> epsilon \n"); }
 multiparam: ID { printf("multiparam -> ID \n"); }
 | ID COMMA multiparam { printf("multiparam -> ID COMMA multiparam \n"); }
 
-return:
+program:
 RETURN L_P add_exp R_P { printf("return -> RETURN L_P add_exp R_P \n"); }
 | RETURN L_P R_P { printf("return -> RETURN L_P R_P \n"); }
 
-array_dec: DEC add_exp DEC ID { printf("array_dec -> DEC add_exp DEC ID \n"); }
+program: DEC add_exp DEC ID { printf("array_dec -> DEC add_exp DEC ID \n"); }
 
-array_access: ID DEC add_exp DEC { printf("array_access -> ID DEC add_exp DEC \n"); }
+program: ID DEC add_exp DEC { printf("array_access -> ID DEC add_exp DEC \n"); }
 
 mul_str: mul_str COMMA mul_str { printf("DEC mul_str %s COMMA mulstr %s\n", $1, $3);} //introduces shift/reduce conflict
 | ID { printf("DEC ID %s\n", $1);}
