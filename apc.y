@@ -39,8 +39,8 @@ stmts: {}
 stmt: DEC mul_str {}
 | DEC ID ASSIGNMENT add_exp SEMICOLON{printf("DEC ID %s ASSIGNMENT add_exp %d SEMICOLON\n",$2, $4);}
 | WHILE S_COND cond E_COND GROUPING { printf("WHILE CONDITIONAL\n"); } 
-| ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3); $$ = $3;}  //introduces shift/reduce conflict
-| add_exp SEMICOLON { printf("add_exp %d end stmt\n"), $1;} 
+| ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3);}  //introduces shift/reduce conflict
+| add_exp SEMICOLON { printf("add_exp %d end stmt\n");} 
 | if_else_stmt { }
 | read { }
 | function_call{}
@@ -49,16 +49,16 @@ stmt: DEC mul_str {}
 | array_dec{}
 | return{}
 
-add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; } //issue: we can't run input where (sub) pro because mul only multiplies exp
-| L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
-| add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3); $$ = $1 + $3; }
-| add_exp SUB add_exp { printf("add_exp %d SUB add_exp %d\n", $1, $3); $$ = $1 - $3; }
+add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); } //issue: we can't run input where (sub) pro because mul only multiplies exp
+| L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); } //introduces shift/reduce conflict
+| add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3);}
+| add_exp SUB add_exp { printf("add_exp %d SUB add_exp %d\n", $1, $3);  }
 
 mul_exp: exp { printf("mul_exp %d: exp\n", $1); $$ = $1; }
 | L_P mul_exp R_P { printf("L_P mul_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
-| mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3); $$ = $1 * $3; }
-| mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3); $$ = $1 / $3; }
-| mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); $$ = $1 % $3; }
+| mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3);  }
+| mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3);  }
+| mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); }
 
 exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } //issue: cant pass up strings (yet!) so implement that tmrw morning
 | SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
