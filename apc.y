@@ -7,7 +7,8 @@
 
     void yyerror(char const *err) {
         fprintf(stderr, "parse problem at line %llu, col %llu\n", current_line, current_column); 
-        fprintf(stderr, "yyerror: %s\n", err); exit(-1); }
+        fprintf(stderr, "yyerror: %s, can't read token: %s\n", err, yytext); exit(-1); }
+
 %}
 
 
