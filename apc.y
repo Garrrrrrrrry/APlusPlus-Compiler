@@ -23,16 +23,16 @@
     char* str;
 }
 
-%type<num> INT stmt mul_exp add_exp exp assignment_stmt
+%type<num> INT stmt mul_exp add_exp exp
 
-%type<str> ID mul_str int_scalar_dec arrays array_access array_dec
+%type<str> ID mul_str
  
 %%
 
 program: stmt SEMICOLON { printf("program -> stmt SEMICOLON\n"); }
 
 stmts: {}
-| stmts stmt {}
+| stmts stmt SEMICOLON {}
 
 stmt: 
     program             { printf("stmt -> program\n"); }
@@ -87,29 +87,19 @@ exp: INT { printf("exp -> INT\n"); }
 
 relational_ops: cond { printf("relational_ops -> cond\n"); }
 
-cond: equality
-    | L_P cond R_P { printf("cond -> L_P cond R_P\n"); }
-    | cond OR cond { printf("cond -> cond OR cond\n"); }
-    | cond AND cond { printf("cond -> cond AND cond\n"); }
-    ;
+cond: equality { printf("cond -> equality \n"); }
+| L_P cond R_P { printf("cond -> L_P cond R_P \n"); }
+| cond OR cond { printf("cond -> cond OR cond \n"); }
+| cond AND cond { printf("cond -> cond AND cond \n"); }
 
-equality: add_exp compare_rhs { printf("equality -> add_exp compare_rhs\n"); }
-        | ID compare_rhs { printf("equality -> ID compare_rhs\n"); }
-        ;
+equality: add_exp { printf("equality -> add_exp \n"); }
+| add_exp LT add_exp { printf("equality -> add_exp LT add_exp \n"); }
+| add_exp EQ add_exp { printf("equality -> add_exp EQ add_exp \n"); }
+| add_exp GT add_exp { printf("equality -> add_exp GT add_exp \n"); }
+| add_exp NE add_exp { printf("equality -> add_exp NE add_exp \n"); }
+| add_exp LEQ add_exp { printf("equality -> add_exp LEQ add_exp \n"); }
+| add_exp GEQ add_exp { printf("equality -> add_exp GEQ add_exp \n"); }
 
-compare_rhs: ID compare add_exp { printf("compare_rhs -> ID compare add_exp\n"); }
-            | add_exp compare ID { printf("compare_rhs -> add_exp compare ID\n"); }
-            ;
-
-compare: LT   { printf("compare -> LT\n"); }
-        | EQ   { printf("compare -> EQ\n"); }
-        | GT   { printf("compare -> GT\n"); }
-        | NE   { printf("compare -> NE\n"); }
-        | LEQ  { printf("compare -> LEQ\n"); }
-        | GEQ  { printf("compare -> GEQ\n"); }
-        | AND  { printf("compare -> AND\n"); }
-        | OR   { printf("compare -> OR\n"); }
-        ;
 
 while_loops:
     WHILE S_COND cond E_COND GROUPING { printf("while_loops -> WHILE S_COND cond E_COND GROUPING\n"); } 
