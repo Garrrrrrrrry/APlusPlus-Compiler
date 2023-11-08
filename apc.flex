@@ -46,6 +46,12 @@ ID [a-zA-Z]
 "]"                         { return E_COND; }
 ":"                         { return GROUPING; }
 "return"                    { return RETURN; }
+">"                         { return ELIF; }
+">[1]"                      { return ELSE; }
+"ain"                       { return RIN; }
+"aout"                      { return ROUT; }
+"return"                    { return RETURN; }
+"|".*"|"                    { yylval.str = strdup(yytext); return COMMENT; }
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
