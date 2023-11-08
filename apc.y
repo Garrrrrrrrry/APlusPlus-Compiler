@@ -5,8 +5,9 @@
     
     int val;
 
-    void yyerror(char const *err) {fprintf(stderr, "yyerror: %s\n", err); exit(-1); }
-
+    void yyerror(char const *err) {
+        fprintf(stderr, "parse problem at line %llu, col %llu\n", current_line, current_column); 
+        fprintf(stderr, "yyerror: %s\n", err); exit(-1); }
 %}
 
 
