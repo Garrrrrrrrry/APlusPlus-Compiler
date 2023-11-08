@@ -1,24 +1,12 @@
-# bubbleSort(## arr, # n):
-    # i, j, swapped;
+|Relational operators (e.g., “<”, “==”, “>”, “!=”)|
+1 lt 2; 
+5 eq 5; 
+6 gt 7; 
+2 ne 3; 
+3 leq 3; 
+5 geq 6; 
 
-	i = 0;
-	when[i lt (n sub 1)]:
-		swapped = 0;
-		j = 0;
-		when[j lt n sub i sub 1]:
-			j = j add 1;
-			?[arr#j# gt arr#j add 1#]:
-				# temp = arr#j#;
-				arr#j# = arr#j add 1#;
-				arr#j add 1# = temp;
+2 and 3; 
+5 or 4; 
 
-
-				swapped = 1;
-		;
-		i = i add 1;
-	;
- 
-        if (swapped eq 0)
-            stop;
-	return();
-;
+(6 lt 7) and (8 gt 9);

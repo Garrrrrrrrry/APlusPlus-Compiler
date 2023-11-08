@@ -12,26 +12,26 @@ x#1#;
 x = 10;
 
 |Arithmetic operators (e.g., “+”, “-”, “*”, “/”)|
-x add y; |+|
-x sub y; |-|
-x pro y; |*|
-x div y; |/|
-x mod y; |%|
+4 add 5; |+|
+3 sub 5; |-|
+2 pro 6; |*|
+2 div 7; |/|
+1 mod 6; |%|
 
-x = (x add y) sub z;
+x = (4 add 7) sub 8;
 
 |Relational operators (e.g., “<”, “==”, “>”, “!=”)|
-x lt y; |<|
-x eq y; |==|
-x gt y; |>|
-x ne y; |!=|
-x leq y; |<=|
-x geq y; |>=|
+1 lt 2; |<|
+5 eq 5; |==|
+6 gt 7; |>|
+2 ne 3; |!=|
+3 leq 3; |<=|
+5 geq 6; |>=|
 
-x and y; |&&|
-x or y; | || |
+2 and 3; |&&|
+5 or 4; | || |
 
-(x lt y) and (x gt z);
+(6 lt 7) and (8 gt 9);
 
 |While or Do-While loops|
 when [x]:

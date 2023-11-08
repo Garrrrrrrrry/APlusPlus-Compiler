@@ -20,7 +20,7 @@ cond
     char* str;
 }
 
-%type<num> INT stmt mul_exp add_exp exp
+%type<num> INT stmt mul_exp add_exp exp equality
 
 %type<str> ID COMMENT mul_str
  
@@ -32,7 +32,7 @@ program: stmt SEMICOLON { printf("program -> stmt SEMICOLON \n"); }
 | stmt SEMICOLON program { printf("program -> stmt SEMICOLON program \n"); }
 
 stmt: DEC mul_str {} 
-| WHILE S_COND add_exp EQ add_exp E_COND GROUPING { printf("WHILE CONDITIONAL %d EQ %d\n", $3, $5); } 
+| WHILE S_COND equality E_COND GROUPING { printf("WHILE CONDITIONAL %d \n", $3); } 
 | ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3); $$ = $3;}  //introduces shift/reduce conflict
 | add_exp SEMICOLON { printf("add_exp %d end stmt\n"), $1;} 
 | if_else_stmt { }
