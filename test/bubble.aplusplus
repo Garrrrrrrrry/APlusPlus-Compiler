@@ -1,5 +1,4 @@
-# bubbleSort(## arr, # n)
-{
+# bubbleSort(## arr, # n):
     # i, j, swapped;
 
 	i = 0;
@@ -21,6 +20,5 @@
  
         if (swapped eq 0)
             stop;
-    }
 	return();
-}
+;
