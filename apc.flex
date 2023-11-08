@@ -48,6 +48,7 @@ ID [a-zA-Z]
 "]"                         { return E_COND; }
 ":"                         { return GROUPING; }
 ">"                         { return ELIF; }
+">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
 "return"                    { return RETURN; }
