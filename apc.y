@@ -97,6 +97,7 @@ RETURN L_P add_exp R_P { printf("return -> RETURN L_P add_exp R_P \n"); }
 | RETURN L_P R_P { printf("return -> RETURN L_P R_P \n"); }
 
 array_dec: DEC add_exp DEC ID { printf("array_dec -> DEC add_exp DEC ID \n"); }
+| DEC DEC ID { printf("array_dec -> DEC DEC ID \n"); }
 
 array_access: ID DEC add_exp DEC { printf("array_access -> ID DEC add_exp DEC \n"); }
 
