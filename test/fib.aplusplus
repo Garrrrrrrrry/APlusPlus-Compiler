@@ -1,19 +1,18 @@
-# Fibonacci ( # n):
+# Fibonacci(# n):
   # a = 0;
   # b = 1;
   # c;
   ?[n eq 1]:
-    return a;
+    return(a);
   >[n eq 2]:
-    return b;
+    return(b);
   >[1]:
-    When [n gt 1]:
+    when [n gt 1]:
       c = a add b;
       a = b;
       b = c;
       n = n sub 1;
     ;
   ;
-  return c;
+  return(c);
 ;
-
