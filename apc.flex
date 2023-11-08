@@ -17,20 +17,17 @@ unsigned long long current_column = 0;
 
 DIGIT [0-9]
 ID [a-zA-Z]
-INT [0-9]+\.[0-9]*
-ARITH_OP (add|sub|pro|div|mod)
-RELAT_OP (lt|eq|gt|ne|leq|geq|and|or)
-STRING [a-z][a-zA-Z]+
+
 /* lexing rules go down there */
 %%
 
-{DIGIT}+      { yylval.num = atoi(yytext); return NUM; }
+{DIGIT}+      { yylval.num = atoi(yytext); return INT; }
 "add"         { return ADD; }
 "sub"         { return SUB; }
 "pro"         { return MUL; }
 "div"         { return DIV; }
-"("           { return L_PAREN; }
-")"           { return R_PAREN; }
+"("           { return L_P; }
+")"           { return R_P; }
 ";"           { return SEMICOLON; }
 
 "lt"          { return LT; }
@@ -43,10 +40,10 @@ STRING [a-z][a-zA-Z]+
 "?"             { return IF; }
 "["             { return S_COND; }
 "]"             { return E_COND; }
-":"             { return THEN; }
+":"             { return GROUPING; }
 ">[1]"          { return ELSE; }
-"ain"           { return READIN; }
-"aout"          { return READOUT; }
+"ain"           { return RIN; }
+"aout"          { return ROUT; }
 \n          { ++current_line; current_column = 0; }
 [ \t*\r*]     /* NOP */
 .           {
