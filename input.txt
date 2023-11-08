@@ -1,8 +1,1 @@
-|abc|
-|testing|
-|123|
-||
-| |
-|Hello World|
 |abc testing 123|
-15 add 5 =
