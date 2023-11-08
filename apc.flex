@@ -51,8 +51,12 @@ ID [a-zA-Z]
 ">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
+<<<<<<< HEAD
 "return"                    { return RETURN; }
 "|".*"|"                    /* NOP */
+=======
+"|".*"|"                    {  }
+>>>>>>> origin/main
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
@@ -61,7 +65,7 @@ ID [a-zA-Z]
 {ID}*[^{ID}^[PUNCT]]{ID}+   { printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate(); }
 .                           {
                                 // note: fprintf(stderr, ""); more traditional for error reporting
-                                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
+                                fprintf(stderr,"lexer problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
                                 yyterminate();
                             }
 
