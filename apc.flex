@@ -21,37 +21,49 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+      { yylval.num = atoi(yytext); return INT; }
-"add"         { return ADD; }
-"sub"         { return SUB; }
-"pro"         { return MUL; }
-"div"         { return DIV; }
-"("           { return L_P; }
-")"           { return R_P; }
-";"           { return SEMICOLON; }
+{DIGIT}+                    { yylval.num = atoi(yytext); return INT; }
+"#"                         { return DEC; }
+"="                         { return ASSIGNMENT; }
+";"                         { return SEMICOLON; }
+"add"                       { return ADD; }
+"sub"                       { return SUB; }
+"pro"                       { return MULT; }
+"div"                       { return DIV; }
+"mod"                       { return MOD; }
+"("                         { return L_P; }
+")"                         { return R_P; }
+","                         { return COMMA; }
+"lt"                        { return LT; }
+"eq"                        { return EQ; }
+"gt"                        { return GT; }
+"ne"                        { return NE; }
+"leq"                       { return LEQ; }
+"geq"                       { return GEQ; }
+"and"                       { return AND; }
+"or"                        { return OR; }
+"stop"                      { return BREAK; }
+"when"                      { return WHILE; }
+"?"                         { return IF; }
+"["                         { return S_COND; }
+"]"                         { return E_COND; }
+":"                         { return GROUPING; }
+">"                         { return ELIF; }
+">[1]"                      { return ELSE; }
+"ain"                       { return RIN; }
+"aout"                      { return ROUT; }
+"return"                    { return RETURN; }
+"|".*"|"                    { yylval.str = strdup(yytext); return COMMENT; }
+{ID}+                       { yylval.str = strdup(yytext); return ID; }
 
-"lt"          { return LT; }
-"eq"          { return EQ; }
-"gt"          { return GT; }
-"ne"          { return NE; }
-"leq"         { return LEQ; }
-"geq"         { return GEQ; }
+\n                          { ++current_line; current_column = 0; }
+[ \t*\r*]                   /* NOP */
 
-"?"             { return IF; }
-"["             { return S_COND; }
-"]"             { return E_COND; }
-":"             { return GROUPING; }
-">[1]"          { return ELSE; }
-"ain"           { return RIN; }
-"aout"          { return ROUT; }
-\n          { ++current_line; current_column = 0; }
-[ \t*\r*]     /* NOP */
-.           {
-                // note: fprintf(stderr, ""); more traditional for error reporting
-                printf("problem at line %llu, col %llu\n", current_line, current_column);
-                yyterminate();
-            }
-{ID}+         { yylval.str = strdup(yytext); return ID; }
+{ID}*[^{ID}^[PUNCT]]{ID}+   { printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate(); }
+.                           {
+                                // note: fprintf(stderr, ""); more traditional for error reporting
+                                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
+                                yyterminate();
+                            }
 
 %%
 
@@ -77,7 +89,7 @@ int main(int argc, char **argv) {
     //comment out yyin for manual input
 //    yyin = input_file;
 //    yylex();
-    yyparse();
+      yyparse();
 //    fclose(input_file);
 
     return 0;
