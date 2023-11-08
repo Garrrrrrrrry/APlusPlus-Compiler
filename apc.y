@@ -12,130 +12,148 @@
 %}
 
 
-
 %token INT L_P R_P S_COND E_COND ASSIGNMENT WHILE GROUPING SEMICOLON ID DEC RETURN COMMA COMMENT MULT BREAK IF ELIF RIN ROUT ELSE
 
+
 %left ADD SUB MUL DIV MOD 
-%left AND OR LT EQ GT GEQ LEQ NE
+%left AND OR LT EQ GT GEQ LEQ NE 
 
 %union{
     int num;
     char* str;
 }
 
+%type<num> INT stmt mul_exp add_exp exp assignment_stmt
 
-
-%type<num> INT stmt mul_exp add_exp exp 
-
-
-%type<str> ID mul_str
+%type<str> ID mul_str int_scalar_dec arrays array_access array_dec
  
 %%
 
-program: stmt SEMICOLON { printf("program -> stmt SEMICOLON \n"); }
-| stmt SEMICOLON program { printf("program -> stmt SEMICOLON program \n"); }
+program: stmt SEMICOLON { printf("program -> stmt SEMICOLON\n"); }
 
 stmts: {}
 | stmts stmt {}
 
-stmt: DEC mul_str {}
-| DEC ID ASSIGNMENT add_exp SEMICOLON{printf("DEC ID %s ASSIGNMENT add_exp %d SEMICOLON\n",$2, $4);}
-| WHILE S_COND cond E_COND GROUPING { printf("WHILE CONDITIONAL\n"); } 
-| ID ASSIGNMENT add_exp{printf("ID %s ASSIGNMENT add_exp %d\n", $1, $3); $$ = $3;}  //introduces shift/reduce conflict
-| add_exp SEMICOLON { printf("add_exp %d end stmt\n"), $1;} 
-| if_else_stmt { }
-| read { }
-| function_call{}
-| function_dec{}
-| array_access{}
-| array_dec{}
-| return{}
+stmt: 
+    program             { printf("stmt -> program\n"); }
+    | int_scalar_dec    { printf("stmt -> int_scalar_dec\n"); }
+    | arrays            { printf("stmt -> arrays\n"); }
+    | assignment_stmt   { printf("stmt -> assignment_stmt\n"); }
+    | arithmetic_ops    { printf("stmt -> arithmetic_ops\n"); }
+    | relational_ops    { printf("stmt - > relational_ops\n"); }
+    | while_loops       { printf("stmt -> while_loops\n"); }
+    | if_else_stmt      { printf("stmt -> if_else_stmt\n"); }
+    | read_write_stmt   { printf("stmt -> read_write\n"); }
+    | functions         { printf("stmt -> functions\n"); }
+    | return            { printf("stmt -> return\n"); }
 
-add_exp: mul_exp { printf("add_exp %d: mul_exp\n", $1); $$ = $1; } //issue: we can't run input where (sub) pro because mul only multiplies exp
-| L_P add_exp R_P { printf("L_P add_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
-| add_exp ADD add_exp { printf("add_exp %d ADD add_exp %d\n", $1, $3); $$ = $1 + $3; }
-| add_exp SUB add_exp { printf("add_exp %d SUB add_exp %d\n", $1, $3); $$ = $1 - $3; }
 
-mul_exp: exp { printf("mul_exp %d: exp\n", $1); $$ = $1; }
-| L_P mul_exp R_P { printf("L_P mul_exp %d R_P\n", $2); $$ = $2; } //introduces shift/reduce conflict
-| mul_exp MUL mul_exp { printf("mul_exp %d MUL mul_exp %d\n", $1, $3); $$ = $1 * $3; }
-| mul_exp DIV mul_exp { printf("mul_exp %d DIV mul_exp %d\n", $1, $3); $$ = $1 / $3; }
-| mul_exp MOD mul_exp { printf("mul_exp %d MOD mul_exp %d\n", $1, $3); $$ = $1 % $3; }
+int_scalar_dec:
+    DEC mul_str             { printf("int_scalar_dec -> DEC mul_str\n"); }
+mul_str: 
+    ID                      { printf("mul_str -> ID\n"); }
+    | mul_str COMMA mul_str { printf("mul_str -> mul_str COMMA mul_str\n"); }
 
-exp: INT { printf("exp %d: INT\n", $1); $$ = $1; } //issue: cant pass up strings (yet!) so implement that tmrw morning
-| SUB exp { printf("SUB exp %d\n", $2); $$ = -$2; }
-| L_P exp R_P { printf("L_P exp %d R_P\n", $2); $$ = $2; }
+arrays:
+    array_dec       { printf("arrays -> array_dec\n"); }
+    | array_access  { printf("arrays -> array_access\n"); }
+array_dec: 
+    DEC INT DEC ID  { printf("array_dec -> DEC INT DEC ID\n"); }
+    | DEC DEC ID    { printf("array_dec -> DEC DEC ID\n"); }
+array_access: 
+    ID DEC INT DEC  { printf("array_access -> ID DEC INT DEC\n"); }
 
-cond: equality { printf("cond -> equality \n"); }
-| L_P cond R_P { printf("cond -> L_P cond R_P \n"); }
-| cond OR cond { printf("cond -> cond OR cond \n"); }
-| cond AND cond { printf("cond -> cond AND cond \n"); }
 
-equality: add_exp { printf("equality -> add_exp \n"); }
-| add_exp LT add_exp { printf("equality -> add_exp LT add_exp \n"); }
-| add_exp EQ add_exp { printf("equality -> add_exp EQ add_exp \n"); }
-| add_exp GT add_exp { printf("equality -> add_exp GT add_exp \n"); }
-| add_exp NE add_exp { printf("equality -> add_exp NE add_exp \n"); }
-| add_exp LEQ add_exp { printf("equality -> add_exp LEQ add_exp \n"); }
-| add_exp GEQ add_exp { printf("equality -> add_exp GEQ add_exp \n"); }
-| ID LT ID { printf("equality -> ID LT ID \n"); }
-| ID EQ ID { printf("equality -> ID EQ ID \n"); }
-| ID GT ID { printf("equality -> ID GT ID \n"); }
-| ID NE ID { printf("equality -> ID NE ID \n"); }
-| ID LEQ ID { printf("equality -> ID LEQ ID \n"); }
-| ID GEQ ID { printf("equality -> ID GEQ ID \n"); }
-| ID LT add_exp { printf("equality -> ID LT add_exp \n"); }
-| ID EQ add_exp { printf("equality -> ID EQ add_exp \n"); }
-| ID GT add_exp { printf("equality -> ID GT add_exp \n"); }
-| ID NE add_exp { printf("equality -> ID NE add_exp \n"); }
-| ID LEQ add_exp { printf("equality -> ID LEQ add_exp \n"); }
-| ID GEQ add_exp { printf("equality -> ID GEQ add_exp \n"); }
-| add_exp LT ID { printf("equality -> add_exp LT ID \n"); }
-| add_exp EQ ID { printf("equality -> add_exp EQ ID \n"); }
-| add_exp GT ID { printf("equality -> add_exp GT ID \n"); }
-| add_exp NE ID { printf("equality -> add_exp NE ID \n"); }
-| add_exp LEQ ID { printf("equality -> add_exp LEQ ID \n"); }
-| add_exp GEQ ID { printf("equality -> add_exp GEQ ID \n"); }
+assignment_stmt:
+    DEC ID ASSIGNMENT add_exp   { printf("assignment_stmt -> DEC ID ASSIGNMENT add_exp"); }
+    | DEC ID ASSIGNMENT ID      { printf("assignment_stmt -> DEC ID ASSIGNMENT ID"); }
+    | ID ASSIGNMENT add_exp     { printf("assignment_stmt -> ID ASSIGNMENT add_exp"); }  //introduces shift/reduce conflict
 
+arithmetic_ops: add_exp { printf("arithmetic_ops -> add_exp\n"); }
+
+add_exp: mul_exp
+    | add_exp ADD mul_exp { printf("add_exp -> add_exp ADD mul_exp\n"); }
+    | add_exp SUB mul_exp %prec SUB { printf("add_exp -> add_exp SUB mul_exp\n"); }
+
+mul_exp: exp
+    | mul_exp MUL exp { printf("mul_exp -> mul_exp MUL exp\n"); }
+    | mul_exp DIV exp { printf("mul_exp -> mul_exp DIV exp\n"); }
+    | mul_exp MOD exp { printf("mul_exp -> mul_exp MOD exp\n"); }
+
+exp: INT { printf("exp -> INT\n"); }
+    | SUB exp { printf("exp -> SUB exp\n"); }
+    | L_P add_exp R_P { printf("exp -> L_P add_exp R_P\n"); }
+
+
+relational_ops: cond { printf("relational_ops -> cond\n"); }
+
+cond: equality
+    | L_P cond R_P { printf("cond -> L_P cond R_P\n"); }
+    | cond OR cond { printf("cond -> cond OR cond\n"); }
+    | cond AND cond { printf("cond -> cond AND cond\n"); }
+    ;
+
+equality: add_exp compare_rhs { printf("equality -> add_exp compare_rhs\n"); }
+        | ID compare_rhs { printf("equality -> ID compare_rhs\n"); }
+        ;
+
+compare_rhs: ID compare add_exp { printf("compare_rhs -> ID compare add_exp\n"); }
+            | add_exp compare ID { printf("compare_rhs -> add_exp compare ID\n"); }
+            ;
+
+compare: LT   { printf("compare -> LT\n"); }
+        | EQ   { printf("compare -> EQ\n"); }
+        | GT   { printf("compare -> GT\n"); }
+        | NE   { printf("compare -> NE\n"); }
+        | LEQ  { printf("compare -> LEQ\n"); }
+        | GEQ  { printf("compare -> GEQ\n"); }
+        | AND  { printf("compare -> AND\n"); }
+        | OR   { printf("compare -> OR\n"); }
+        ;
+
+while_loops:
+    WHILE S_COND cond E_COND GROUPING { printf("while_loops -> WHILE S_COND cond E_COND GROUPING\n"); } 
+
+functions:
+    function_dec    { printf("functions -> function_dec\n"); }
+    | function_call { printf("functions -> function_call\n"); }
 
 function_dec:
-DEC ID L_P param R_P GROUPING stmts SEMICOLON { printf("function_dec -> DEC ID L_P param R_P GROUPING \n"); }
-
+    DEC ID L_P param R_P GROUPING stmts SEMICOLON   { printf("function_dec -> DEC ID L_P param R_P GROUPING\n"); }
 function_call:
-ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
+    ID L_P param R_P    { printf("function_call -> ID L_P param R_P\n"); }
 
-param: { printf("param -> epsilon \n"); }
-| DEC ID { printf("param -> ID \n"); }
-| DEC ID COMMA multiparam { printf("param -> ID COMMA multiparam \n"); }
+param:                      
+    /* none */                  { printf("param -> epsilon\n"); }
+    | DEC ID                    { printf("param -> DEC ID\n"); }
+    | DEC ID COMMA multiparam   { printf("param -> DEC ID COMMA multiparam\n"); }
 
-multiparam: ID { printf("multiparam -> ID \n"); }
-| DEC ID COMMA multiparam { printf("multiparam -> ID COMMA multiparam \n"); }
+multiparam: 
+    ID                          { printf("multiparam -> ID\n"); }
+    | DEC ID COMMA multiparam   { printf("multiparam -> DEC ID COMMA multiparam\n"); }
 
-return: RETURN L_P add_exp R_P { printf("return -> RETURN L_P add_exp R_P \n"); }
-| RETURN L_P ID R_P { printf("return -> RETURN L_P ID R_P \n"); }
-| RETURN L_P R_P { printf("return -> RETURN L_P R_P \n"); }
+return: 
+    RETURN L_P add_exp R_P  { printf("return -> RETURN L_P add_exp R_P\n"); }
+    | RETURN L_P ID R_P     { printf("return -> RETURN L_P ID R_P \n"); }
+    | RETURN L_P R_P        { printf("return -> RETURN L_P R_P \n"); }
 
-array_dec: DEC add_exp DEC ID { printf("array_dec -> DEC add_exp DEC ID \n"); }
-| DEC DEC ID { printf("array_dec -> DEC DEC ID \n"); }
 
-array_access: ID DEC add_exp DEC { printf("array_access -> ID DEC add_exp DEC \n"); }
+read_write_stmt: 
+    read_out            { printf("read_write_stmt -> read_out\n"); }
+    | read_in           { printf("read_write_stmt -> read_in\n"); }
+read_in: 
+    RIN L_P ID R_P      { printf("read_in -> RIN L_P ID R_P\n"); }
+read_out: 
+    ROUT L_P ID R_P     { printf("read_out -> ROUT L_P ID R_P\n"); }
+    | ROUT L_P INT R_P  { printf("read_out -> ROUT L_P INT R_P\n"); }
 
-mul_str: mul_str COMMA mul_str { printf("DEC mul_str %s COMMA mulstr %s\n", $1, $3);} //introduces shift/reduce conflict
-| ID { printf("DEC ID %s\n", $1);}
 
-read: read_out {}
-| read_in {}
-
-read_in: RIN L_P ID R_P { printf("taking input from command line\n"); }
-
-read_out: ROUT L_P ID R_P { printf("Printing %s to command line\n", $3); }
-| ROUT L_P INT R_P { printf("Printing %d to command line\n", $3); }
-
-if_else_stmt: if_stmt stmt else_stmt stmt {}
-| if_stmt stmt {}
-
-if_stmt: IF S_COND cond E_COND GROUPING { printf("If conditional, then do something\n");}
-
-else_stmt: ELSE GROUPING{ printf("Else, do something else.\n"); }
+if_else_stmt: 
+    if_stmt stmt else_stmt stmt     { printf("if_else_stmt -> if_stmt stmt else_stmt stmt\n"); }
+    | if_stmt stmt                  { printf("if_else_stmt -> if_stmt stmt\n"); }
+if_stmt: 
+    IF S_COND cond E_COND GROUPING  { printf("if_stmt -> IF S_COND cond E_COND GROUPING\n"); }
+else_stmt: 
+    ELSE GROUPING                   { printf("else_stmt -> ELSE GROUPING\n"); }
 
 %%

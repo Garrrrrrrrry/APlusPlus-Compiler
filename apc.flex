@@ -51,12 +51,7 @@ ID [a-zA-Z]
 ">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
-<<<<<<< HEAD
-"return"                    { return RETURN; }
-"|".*"|"                    /* NOP */
-=======
 "|".*"|"                    {  }
->>>>>>> origin/main
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
