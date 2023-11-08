@@ -1,4 +1,4 @@
-# bubbleSort(## arr, # n):
+# bubbleSort(# n, ## arr):
     # i, j, swapped;
 
 	i = 0;
