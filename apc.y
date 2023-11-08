@@ -115,13 +115,13 @@ mul_str: mul_str COMMA mul_str { printf("DEC mul_str %s COMMA mulstr %s\n", $1, 
 read: read_out {}
 | read_in {}
 
-read_in: RIN L_P stmt R_P SEMICOLON{ printf("taking input from command line\n"); }
+read_in: RIN L_P ID R_P { printf("taking input from command line\n"); }
 
-read_out: ROUT L_P ID R_P SEMICOLON{ printf("Printing %s to command line\n", $3); }
-| ROUT L_P INT R_P SEMICOLON{ printf("Printing %d to command line\n", $3); }
+read_out: ROUT L_P ID R_P { printf("Printing %s to command line\n", $3); }
+| ROUT L_P INT R_P { printf("Printing %d to command line\n", $3); }
 
-if_else_stmt: if_stmt stmt else_stmt stmt SEMICOLON
-| if_stmt stmt SEMICOLON
+if_else_stmt: if_stmt stmt else_stmt stmt {}
+| if_stmt stmt {}
 
 if_stmt: IF S_COND add_exp EQ add_exp E_COND GROUPING { printf("If %d is equivalent to %d, then do something\n", $3, $5);}
 | IF S_COND add_exp LT add_exp E_COND GROUPING { printf("If %d is less than %d, then do something\n", $3, $5);}
@@ -131,7 +131,6 @@ if_stmt: IF S_COND add_exp EQ add_exp E_COND GROUPING { printf("If %d is equival
 | IF S_COND add_exp NE add_exp E_COND GROUPING { printf("If %d is not equivalent to %d, then do something\n", $3, $5);}
 
 else_stmt: ELSE GROUPING{ printf("Else, do something else.\n"); }
-|
 
 %%
 

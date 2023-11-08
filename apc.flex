@@ -45,6 +45,7 @@ ID [a-zA-Z]
 "["                         { return S_COND; }
 "]"                         { return E_COND; }
 ":"                         { return GROUPING; }
+"?"                         { return IF; }
 "return"                    { return RETURN; }
 ">"                         { return ELIF; }
 ">[1]"                      { return ELSE; }
