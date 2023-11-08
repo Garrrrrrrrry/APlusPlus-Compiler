@@ -7,7 +7,7 @@
 
     void yyerror(char const *err) {
         fprintf(stderr, "parse problem at line %llu, col %llu\n", current_line, current_column); 
-        fprintf(stderr, "yyerror: %s, can't read token: %s\n", err, yytext); exit(-1); }
+        fprintf(stderr, "yyerror: %s\n", err); exit(-1); }
 
 %}
 
@@ -29,60 +29,61 @@
  
 %%
 
-program: stmt SEMICOLON { printf("program -> stmt SEMICOLON\n"); }
+program: stmt SEMICOLON     { printf("program -> stmt SEMICOLON\n"); }
+| stmt SEMICOLON program    { printf("program -> stmt SEMICOLON program \n"); }
 
-stmts: /* none */ { printf("stmts -> none\n"); }
-    | stmts stmt SEMICOLON { printf("stmts -> stmts stmt SEMICOLON\n"); }
+stmts: /* none */           { printf("stmts -> none\n"); }
+    | stmts stmt SEMICOLON  { printf("stmts -> stmts stmt SEMICOLON\n"); }
 
-stmt: DEC mul_str { printf("stmt -> DEC mul_str\n"); }
-    | DEC ID ASSIGNMENT add_exp { printf("stmt -> DEC ID ASSIGNMENT add_exp\n"); }
-    | WHILE S_COND cond E_COND GROUPING stmts { printf("stmt -> WHILE S_COND cond E_COND GROUPING stmts\n"); } 
-    | ID ASSIGNMENT add_exp { printf("stmt -> ID ASSIGNMENT add_exp\n"); }
-    | if_else_stmt { printf("stmt -> if_else_stmt\n"); }
-    | read_write_stmt { printf("stmt -> read_write_stmt\n"); }
-    | function_call{ printf("stmt -> function_call\n"); }
-    | function_dec{ printf("stmt -> function_dec\n"); }
-    | array_access{ printf("stmt -> array_access\n"); }
-    | array_dec{ printf("stmt -> array_dec\n"); }
-    | return{ printf("stmt -> return\n"); }
+stmt: DEC mul_str                               { printf("stmt -> DEC mul_str\n"); }
+    | DEC ID ASSIGNMENT add_exp                 { printf("stmt -> DEC ID ASSIGNMENT add_exp\n"); }
+    | WHILE S_COND cond E_COND GROUPING stmts   { printf("stmt -> WHILE S_COND cond E_COND GROUPING stmts\n"); } 
+    | ID ASSIGNMENT add_exp                     { printf("stmt -> ID ASSIGNMENT add_exp\n"); }
+    | if_else_stmt                              { printf("stmt -> if_else_stmt\n"); }
+    | read                                      { printf("stmt -> read\n"); }
+    | function_call                             { printf("stmt -> function_call\n"); }
+    | function_dec                              { printf("stmt -> function_dec\n"); }
+    | array_access                              { printf("stmt -> array_access\n"); }
+    | array_dec                                 { printf("stmt -> array_dec\n"); }
+    | return                                    { printf("stmt -> return\n"); }
 
-mul_str: ID COMMA mul_str  { printf("mul_str -> mul_str COMMA mul_str\n"); }
-    | ID                  { printf("mul_str -> ID\n"); }
+add_exp: 
+    add_exp ADD mul_exp                         { printf("add_exp -> add_exp ADD mul_exp\n"); }
+    | add_exp SUB mul_exp                       { printf("add_exp -> add_exp SUB mul_exp\n"); }
+    | mul_exp                                   { printf("add_exp -> mul_exp\n"); }
+
+mul_exp: 
+    mul_exp MUL exp         { printf("mull_exp -> mul_exp MUL exp\n"); }
+    | mul_exp DIV exp       { printf("mull_exp -> mul_exp DIV exp\n"); }
+    | mul_exp MOD exp       { printf("mull_exp -> mul_exp MOD exp\n"); }
+    | exp                   { printf("mul_exp -> exp\n"); }
+
+exp: 
+    INT                 { printf("exp -> INT\n"); $$ = $1; }
+    | ID                { printf("exp -> ID\n");}
+    | SUB exp           { printf("exp -> SUB exp\n"); $$ = -($2); }
+    | L_P add_exp R_P   { printf("exp -> L_P add_exp R_P\n"); $$ = $2; };
+
+
+cond: 
+    add_exp                 { printf("cond -> add_exp\n"); }
+   | add_exp LT add_exp     { printf("cond -> add_exp LT add_exp\n"); }
+   | add_exp EQ add_exp     { printf("cond -> add_exp EQ add_exp\n"); }
+   | add_exp GT add_exp     { printf("cond -> add_exp GT add_exp\n"); }
+   | add_exp NE add_exp     { printf("cond -> add_exp NE add_exp\n"); }
+   | add_exp LEQ add_exp    { printf("cond -> add_exp LEQ add_exp\n"); }
+   | add_exp GEQ add_exp    { printf("cond -> add_exp GEQ add_exp\n"); }
+   | add_exp AND add_exp    { printf("cond -> add_exp AND add_exp\n"); }
+   | add_exp OR add_exp     { printf("cond -> add_exp OR add_exp\n"); }
+
+mul_str: ID COMMA mul_str   { printf("mul_str -> mul_str COMMA mul_str\n"); }
+    | ID                    { printf("mul_str -> ID\n"); }
 
 array_dec: 
     DEC INT DEC ID  { printf("array_dec -> DEC INT DEC ID\n"); }
     | DEC DEC ID    { printf("array_dec -> DEC DEC ID\n"); }
-array_access: 
-    ID DEC INT DEC  { printf("array_access -> ID DEC INT DEC\n"); }
 
-
-add_exp: 
-    add_exp ADD mul_exp { printf("add_exp -> add_exp ADD mul_exp\n"); }
-    | add_exp SUB mul_exp { printf("add_exp -> add_exp SUB mul_exp\n"); }
-    | mul_exp { printf("add_exp -> mul_exp\n"); }
-
-mul_exp: 
-    mul_exp MUL exp { printf("mull_exp -> mul_exp MUL exp\n"); }
-    | mul_exp DIV exp { printf("mull_exp -> mul_exp DIV exp\n"); }
-    | mul_exp MOD exp { printf("mull_exp -> mul_exp MOD exp\n"); }
-    | exp { printf("mul_exp -> exp\n"); }
-
-exp: 
-    INT { printf("exp -> INT\n"); $$ = $1; }
-   | SUB exp { printf("exp -> SUB exp\n"); $$ = -($2); }
-   | L_P add_exp R_P { printf("exp -> L_P add_exp R_P\n"); $$ = $2; };
-
-cond: 
-    add_exp { printf("cond -> add_exp\n"); }
-   | add_exp LT add_exp { printf("cond -> add_exp LT add_exp\n"); }
-   | add_exp EQ add_exp { printf("cond -> add_exp EQ add_exp\n"); }
-   | add_exp GT add_exp { printf("cond -> add_exp GT add_exp\n"); }
-   | add_exp NE add_exp { printf("cond -> add_exp NE add_exp\n"); }
-   | add_exp LEQ add_exp { printf("cond -> add_exp LEQ add_exp\n"); }
-   | add_exp GEQ add_exp { printf("cond -> add_exp GEQ add_exp\n"); }
-   | add_exp AND add_exp { printf("cond -> add_exp AND add_exp\n"); }
-   | add_exp OR add_exp { printf("cond -> add_exp OR add_exp\n"); }
-
+array_access: ID DEC INT DEC  { printf("array_access -> ID DEC INT DEC\n"); }
 
 function_dec:
     DEC ID L_P param R_P GROUPING stmts SEMICOLON   { printf("function_dec -> DEC ID L_P param R_P GROUPING\n"); }
@@ -101,10 +102,10 @@ multiparam:
 return: 
     RETURN L_P add_exp R_P  { printf("return -> RETURN L_P add_exp R_P\n"); }
     | RETURN L_P ID R_P     { printf("return -> RETURN L_P ID R_P \n"); }
+    | RETURN ID             { printf("return -> RETURN ID \n"); }
     | RETURN L_P R_P        { printf("return -> RETURN L_P R_P \n"); }
 
-
-read_write_stmt: 
+read: 
     read_out            { printf("read_write_stmt -> read_out\n"); }
     | read_in           { printf("read_write_stmt -> read_in\n"); }
 read_in: 

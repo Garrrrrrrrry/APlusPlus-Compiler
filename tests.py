@@ -1,10 +1,9 @@
 import subprocess
 
-# Open input file
-input_file = "input.txt"
-with open(input_file, 'r', encoding='utf-8') as infile:
-    # Open output file
-    with open("output.txt", 'w') as outfile:
+input_files = ["input.txt"]#, "test/bubble.aplusplus", "test/fib.aplusplus", "test/readme_tests.txt"]
+output_files = ["output.txt"]#, "test/output_bubble.txt", "test/output_fib.txt", "test/output_readme.txt"]
+
+for input_file, output_file in zip(input_files, output_files):
+    with open(input_file, 'r', encoding='utf-8') as infile, open(output_file, 'w') as outfile:
         for line in infile:
-            # Run parser.exe with the line as input, writing the output to output.txt
             subprocess.run(["./parser.exe"], input=line, text=True, stdout=outfile)

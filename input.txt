@@ -1,51 +1,15 @@
 #x;
-#10# x;
-x#1#;
-x = 10;
-x add y;
-x sub y;
-x pro y;
-x div y;
-x mod y;
-x = (4 add 7) sub 8;
-x lt y;
-x eq y;
-x gt y;
-x ne y; 
-x leq y;
-x geq y;
-
-x and y;
-x or y;
-
-(6 lt 7) and (8 gt 9);
-
-|While or Do-While loops|
-when [x]:
-|do whatever|;
+#t, y, z;
+#x = 5;
+x = 6;
+when [x lt 5]:
+#z;
+#a;
 ;
-
-|Break statement|
-stop;
-
-|If-then-else statements|
-?[(x add y) eq 4]:
-do whatever;
->[(x add y) eq 3]:
-do whatever2;
->[1]:
-;
-
-|Read and write statements|
-ain(x);
-aout(x);
-
-|Functions (that can take multiple scalar arguments and return a single scalar result)|
-# myfunction(parameters):
-return(x);
-;
-
-# myfunction2(parameters):
-return();
-;
-|returning nothing|
+    when [n gt 1]:
+      c = a add b;
+      a = b;
+      b = c;
+      n = n sub 1;
+    ;
+return c;

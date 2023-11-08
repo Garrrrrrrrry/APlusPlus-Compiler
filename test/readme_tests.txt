@@ -3,7 +3,6 @@
 # x, y;
 
 |One-dimensional arrays of integers|
-|for array of size 10|
 #10# x;
 |to access element with index of 1|
 x#1#;
@@ -12,30 +11,29 @@ x#1#;
 x = 10;
 
 |Arithmetic operators (e.g., “+”, “-”, “*”, “/”)|
-4 add 5; 
-3 sub 5; 
-2 pro 6; 
-2 div 7; 
-1 mod 6; 
+x add y;
+x sub y;
+x pro y;
+x div y;
+x mod y;
 
 x = (4 add 7) sub 8;
 
 |Relational operators (e.g., “<”, “==”, “>”, “!=”)|
-1 lt 2; 
-5 eq 5; 
-6 gt 7; 
-2 ne 3; 
-3 leq 3; 
-5 geq 6; 
+x lt y;
+x eq y;
+x gt y;
+x ne y; 
+x leq y;
+x geq y;
 
-2 and 3; 
-5 or 4; 
+x and y;
+x or y;
 
 (6 lt 7) and (8 gt 9);
 
 |While or Do-While loops|
 when [x]:
-|do whatever|;
 ;
 
 |Break statement|
@@ -43,9 +41,7 @@ stop;
 
 |If-then-else statements|
 ?[(x add y) eq 4]:
-do whatever;
 >[(x add y) eq 3]:
-do whatever2;
 >[1]:
 ;
 
@@ -53,18 +49,12 @@ do whatever2;
 ain(x);
 aout(x);
 
-|Comments|
-|comment|
-
 |Functions (that can take multiple scalar arguments and return a single scalar result)|
 # myfunction(parameters):
-function body;
 return(x);
 ;
-|returning an integer|
 
 # myfunction2(parameters):
-function body;
 return();
 ;
 |returning nothing|
