@@ -29,15 +29,12 @@
  
 %%
 
-program: 
-    stmt SEMICOLON { printf("program -> stmt SEMICOLON\n"); }
+program: stmt SEMICOLON { printf("program -> stmt SEMICOLON\n"); }
 
-stmts: 
-    /* none */ { printf("stmts -> none\n"); }
+stmts: /* none */ { printf("stmts -> none\n"); }
     | stmts stmt SEMICOLON { printf("stmts -> stmts stmt SEMICOLON\n"); }
 
-stmt: 
-    DEC mul_str { printf("stmt -> DEC mul_str\n"); }
+stmt: DEC mul_str { printf("stmt -> DEC mul_str\n"); }
     | DEC ID ASSIGNMENT add_exp { printf("stmt -> DEC ID ASSIGNMENT add_exp\n"); }
     | WHILE S_COND cond E_COND GROUPING stmts { printf("stmt -> WHILE S_COND cond E_COND GROUPING stmts\n"); } 
     | ID ASSIGNMENT add_exp { printf("stmt -> ID ASSIGNMENT add_exp\n"); }
@@ -49,9 +46,8 @@ stmt:
     | array_dec{ printf("stmt -> array_dec\n"); }
     | return{ printf("stmt -> return\n"); }
 
-mul_str: 
-    ID                  { printf("mul_str -> ID\n"); }
-    | ID COMMA mul_str  { printf("mul_str -> mul_str COMMA mul_str\n"); }
+mul_str: ID COMMA mul_str  { printf("mul_str -> mul_str COMMA mul_str\n"); }
+    | ID                  { printf("mul_str -> ID\n"); }
 
 array_dec: 
     DEC INT DEC ID  { printf("array_dec -> DEC INT DEC ID\n"); }

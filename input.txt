@@ -1,24 +1,13 @@
-|Integer scalar variables|
 #x;
-
-|One-dimensional arrays of integers|
 #10# x;
-|to access element with index of 1|
 x#1#;
-
-|Assignment statements|
-x = 10;s
-
-|Arithmetic operators (e.g., “+”, “-”, “*”, “/”)|
+x = 10;
 x add y;
 x sub y;
 x pro y;
 x div y;
 x mod y;
-
 x = (4 add 7) sub 8;
-
-|Relational operators (e.g., “<”, “==”, “>”, “!=”)|
 x lt y;
 x eq y;
 x gt y;
