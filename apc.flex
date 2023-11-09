@@ -51,6 +51,7 @@ ID [a-zA-Z]
 ">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
+"stop"                      { return BREAK; }
 "|".*"|"                    {  }
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 

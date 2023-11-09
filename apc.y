@@ -30,22 +30,41 @@
 %%
 
 program: stmt SEMICOLON     { printf("program -> stmt SEMICOLON\n"); }
-| stmt SEMICOLON program    { printf("program -> stmt SEMICOLON program \n"); }
+| stmt SEMICOLON program    { printf("program -> stmt SEMICOLON program\n"); }
 
 stmts: /* none */           { printf("stmts -> none\n"); }
     | stmts stmt SEMICOLON  { printf("stmts -> stmts stmt SEMICOLON\n"); }
 
-stmt: DEC mul_str                               { printf("stmt -> DEC mul_str\n"); }
-    | DEC ID ASSIGNMENT add_exp                 { printf("stmt -> DEC ID ASSIGNMENT add_exp\n"); }
-    | WHILE S_COND cond E_COND GROUPING stmts   { printf("stmt -> WHILE S_COND cond E_COND GROUPING stmts\n"); } 
-    | ID ASSIGNMENT add_exp                     { printf("stmt -> ID ASSIGNMENT add_exp\n"); }
+stmt: 
+    function_dec                                { printf("stmt -> function_dec\n"); }
+    | mult_var                                  { printf("stmt -> mult_var\n"); }
+    | arith_relat_ops                           { printf("stmt -> arith_relat_ops\n"); }
+    | while_loop                                { printf("stmt -> while_loop\n"); }
+    | assignment                                { printf("stmt -> assignment\n"); }
     | if_else_stmt                              { printf("stmt -> if_else_stmt\n"); }
     | read                                      { printf("stmt -> read\n"); }
     | function_call                             { printf("stmt -> function_call\n"); }
-    | function_dec                              { printf("stmt -> function_dec\n"); }
     | array_access                              { printf("stmt -> array_access\n"); }
     | array_dec                                 { printf("stmt -> array_dec\n"); }
     | return                                    { printf("stmt -> return\n"); }
+    | break                                     { printf("stmt -> break\n"); }
+
+mult_var:
+    DEC mul_str                               { printf("stmt -> DEC mul_str\n"); }
+
+assignment:
+    ID ASSIGNMENT add_exp                       { printf("assignment -> ID ASSIGNMENT add_exp\n"); }
+    | DEC ID ASSIGNMENT add_exp                 { printf("assignment -> DEC ID ASSIGNMENT add_exp\n"); }
+    | array_dec ASSIGNMENT array_rhs         { printf("assignment -> array_dec ASSIGNMENT array_rhs\n"); }
+    | array_access ASSIGNMENT array_rhs      { printf("assignment -> array_access ASSIGNMENT array_rhs\n"); }
+
+array_rhs:
+    array_access { printf("array_rhs -> array_access\n"); }
+    | ID { printf("array_rhs -> ID\n"); }
+    | INT { printf("array_rhs -> INT\n"); }
+
+while_loop:
+    WHILE S_COND cond E_COND GROUPING stmts   { printf("stmt -> WHILE S_COND cond E_COND GROUPING stmts\n"); } 
 
 add_exp: 
     add_exp ADD mul_exp                         { printf("add_exp -> add_exp ADD mul_exp\n"); }
@@ -63,8 +82,10 @@ exp:
     | ID                { printf("exp -> ID\n");}
     | SUB exp           { printf("exp -> SUB exp\n"); $$ = -($2); }
     | array_access      { printf("exp -> array_access\n"); }
-    | L_P add_exp R_P   { printf("exp -> L_P add_exp R_P\n"); $$ = $2; };
+    | L_P cond R_P   { printf("exp -> L_P add_exp R_P\n"); };
 
+arith_relat_ops:
+    cond { printf("arith_relat_ops -> cond\n"); }
 
 cond: 
     add_exp                 { printf("cond -> add_exp\n"); }
@@ -90,28 +111,32 @@ array_access:
     | ID DEC ID ADD INT DEC     { printf("array_access -> ID DEC ID ADD INT DEC\n"); }
 
 function_dec:
-    DEC ID L_P param R_P GROUPING stmts   { printf("function_dec -> DEC ID L_P param R_P GROUPING\n"); }
+    DEC function_name L_P param R_P GROUPING stmts   { printf("function_dec -> DEC ID L_P param R_P GROUPING\n"); }
+
+function_name:
+    ID          { printf("function_name -> ID\n"); }
+    | ID INT    { printf("function_name -> ID INT\n"); }
+
 function_call:
     ID L_P param R_P    { printf("function_call -> ID L_P param R_P\n"); }
 
 param:                      
-    /* none */                         { printf("param -> epsilon\n"); }
-    | DEC param_val                    { printf("param -> DEC ID\n"); }
-    | DEC param_val COMMA multiparam   { printf("param -> DEC ID COMMA multiparam\n"); }
+    /* none */                      { printf("param -> \n"); }
+    | param_val                     { printf("param -> param_val\n"); }
+    | param_val COMMA param         { printf("param -> param_val COMMA param\n"); }
 
 param_val:
-    ID          { printf("param_val -> ID\n"); }
-    | DEC ID    { printf("param_val -> DEC ID\n"); }
-
-multiparam: 
-    ID                          { printf("multiparam -> ID\n"); }
-    | DEC param_val COMMA multiparam   { printf("multiparam -> DEC ID COMMA multiparam\n"); }
+    DEC ID          { printf("param_val -> DEC ID\n"); }
+    | DEC DEC ID    { printf("param_val -> DEC DEC ID\n"); }
 
 return: 
     RETURN L_P add_exp R_P  { printf("return -> RETURN L_P add_exp R_P\n"); }
     | RETURN L_P ID R_P     { printf("return -> RETURN L_P ID R_P \n"); }
     | RETURN ID             { printf("return -> RETURN ID \n"); }
     | RETURN L_P R_P        { printf("return -> RETURN L_P R_P \n"); }
+
+break:
+    BREAK { printf("break -> BREAK\n"); }
 
 read: 
     read_out            { printf("read_write_stmt -> read_out\n"); }
@@ -124,17 +149,17 @@ read_out:
 
 
 if_else_stmt: 
-    if_stmt                          { printf("if_else_stmt -> if_stmt stmt\n"); }
+    if_stmt stmts                    { printf("if_else_stmt -> if_stmt stmt\n"); }
 
 if_stmt: 
     IF S_COND cond E_COND GROUPING   { printf("if_stmt -> IF S_COND cond E_COND GROUPING\n"); }
-    | else_stmt { printf("if_stmt -> else_stmt\n"); }
     | elif_stmt { printf("if_stmt -> elif_stmt\n"); }
-
-else_stmt: 
-    ELSE GROUPING                    { printf("else_stmt -> ELSE GROUPING\n"); }
+    | else_stmt { printf("if_stmt -> else_stmt\n"); }
 
 elif_stmt:
     ELIF S_COND cond E_COND GROUPING { printf("elif_stmt -> ELIF S_COND cond E_COND GROUPING\n"); }
+
+else_stmt: 
+    ELSE GROUPING                    { printf("else_stmt -> ELSE GROUPING\n"); }
 
 %%

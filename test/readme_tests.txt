@@ -41,7 +41,9 @@ stop;
 
 |If-then-else statements|
 ?[(x add y) eq 4]:
+;
 >[(x add y) eq 3]:
+;
 >[1]:
 ;
 
@@ -50,11 +52,10 @@ ain(x);
 aout(x);
 
 |Functions (that can take multiple scalar arguments and return a single scalar result)|
-# myfunction(parameters):
+# myfunction(# parameters):
 return(x);
 ;
-
-# myfunction2(parameters):
+# myfunction2(# parameters):
 return();
 ;
 |returning nothing|
