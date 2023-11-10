@@ -61,7 +61,7 @@ ID [a-zA-Z]
 .                           {
                                 // note: fprintf(stderr, ""); more traditional for error reporting
                                 printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
-                                yyterminate();
+                                
                             }
 
 %%

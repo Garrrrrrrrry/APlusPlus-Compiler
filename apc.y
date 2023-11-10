@@ -117,6 +117,7 @@ WHILE S_COND cond E_COND GROUPING program { printf("while -> WHILE S_COND cond E
 
 if:
 IF S_COND cond E_COND GROUPING program elif { printf("if -> IF S_COND cond E_COND GROUPING program elif \n"); }
+|IF IF S_COND cond E_COND GROUPING program elif { yyerror("error: double if  \n"); }
 
 elif:
  { printf("elif -> epsilon \n"); }
