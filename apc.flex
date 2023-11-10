@@ -21,13 +21,13 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+                    { yylval.num = atoi(yytext); return INT; }
+{DIGIT}+                    { return INT; }
 "#"                         { return DEC; }
 "="                         { return ASSIGNMENT; }
 ";"                         { return SEMICOLON; }
 "add"                       { return ADD; }
 "sub"                       { return SUB; }
-"pro"                       { return MUL; }
+"pro"                       { return MULT; }
 "div"                       { return DIV; }
 "mod"                       { return MOD; }
 "("                         { return L_P; }
@@ -41,19 +41,18 @@ ID [a-zA-Z]
 "geq"                       { return GEQ; }
 "and"                       { return AND; }
 "or"                        { return OR; }
+"stop"                      { return BREAK; }
 "when"                      { return WHILE; }
+"?"                         { return IF; }
 "["                         { return S_COND; }
 "]"                         { return E_COND; }
 ":"                         { return GROUPING; }
-"?"                         { return IF; }
-"return"                    { return RETURN; }
 ">"                         { return ELIF; }
-">[1]"                      { return ELSE; }
 "ain"                       { return RIN; }
 "aout"                      { return ROUT; }
-"stop"                      { return BREAK; }
+"return"                    { return RETURN; }
 "|".*"|"                    {  }
-{ID}+                       { yylval.str = strdup(yytext); return ID; }
+{ID}+                       { return ID; }
 
 \n                          { ++current_line; current_column = 0; }
 [ \t*\r*]                   /* NOP */
@@ -61,7 +60,7 @@ ID [a-zA-Z]
 {ID}*[^{ID}^[PUNCT]]{ID}+   { printf("problem at line %llu, col %llu : Invalid ID\n", current_line, current_column); yyterminate(); }
 .                           {
                                 // note: fprintf(stderr, ""); more traditional for error reporting
-                                fprintf(stderr,"lexer problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
+                                printf("problem at line %llu, col %llu : unrecognized symbol\n", current_line, current_column);
                                 yyterminate();
                             }
 
