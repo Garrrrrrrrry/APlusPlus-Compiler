@@ -135,7 +135,7 @@ INT {
     char *name = genTempName();
 
     printf(". %s\n", name);
-    printf("= %s, -%s\n", name, $2);
+    printf("- %s, 0, %s\n", name, $2);
 
     $$.name = name;
     $$.value = -$2;
