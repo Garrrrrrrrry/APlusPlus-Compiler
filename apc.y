@@ -76,9 +76,9 @@ int_dec: DEC ID ASSIGNMENT cond {
         }
     }
     VecPush(&vecVar, $2);
-    VecPush(&vec, $4.value);
+    VecPush(&vec, $4.name);
     printf(". %s\n", $2);
-    printf("= %s, %s\n", $2, $4.value); 
+    printf("= %s, %s\n", $2, $4.name); 
     }
 | DEC int_assign {}
 
@@ -118,7 +118,7 @@ ID ASSIGNMENT cond {
     for (; i < vecVar.len; ++i){
         if (0 == strcmp(vecVar.data[i], $1)){
             vec.data[i] = $3.name;
-            printf("= %s, %s\n", $1, $3.value);
+            printf("= %s, %s\n", $1, $3.name);
             exit(0);
         }
     }
