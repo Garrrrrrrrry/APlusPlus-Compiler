@@ -148,7 +148,7 @@ INT {
     $$.value = $1;
  }
 
-cond: L_P cond R_P { }
+cond: L_P cond R_P { $$.name = $2.name; }
 | cond OR cond { 
     char *name = genTempName();
 
@@ -170,7 +170,7 @@ cond: L_P cond R_P { }
     $$.name = $1.name;
 }
 
-equality: L_P equality R_P {}
+equality: L_P equality R_P { $$.name = $2.name; }
 | equality LT equality { 
     char *name = genTempName();
 
