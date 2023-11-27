@@ -19,7 +19,7 @@
 
 %}
 
-%token INT S_COND E_COND WHILE GROUPING SEMICOLON ID DEC RETURN COMMA BREAK IF ELIF RIN ROUT COMMENT 
+%token INT S_COND E_COND WHILE GROUPING SEMICOLON ID DEC RETURN COMMA BREAK IF ELIF RIN ROUT COMMENT NEG
 
 %right ADD SUB MULT DIV MOD 
 %left EQ GT GEQ LEQ NE
@@ -55,7 +55,10 @@ int_dec SEMICOLON { }
 | rout SEMICOLON { }
 | break SEMICOLON { printf("stmt -> break SEMICOLON \n"); }
 
-int_dec: DEC ID ASSIGNMENT cond { printf("= %s, %s\n", $2, $4.name); }
+int_dec: DEC ID ASSIGNMENT cond { 
+    printf(". %s\n", $2);
+    printf("= %s, %s\n", $2, $4.name); 
+    }
 | DEC int_assign {}
 
 int_assign: int_assign COMMA ID { printf(". %s\n", $3); }
@@ -66,10 +69,10 @@ ID ASSIGNMENT cond {
     printf("= %s, %s\n", $1, $3.name);
  }
 | ID DEC INT DEC ASSIGNMENT cond { 
-    printf("[]= %s, %d, %s\n", $1, $3, $6.name);
+    printf("[]= %s, %s, %s\n", $1, $3, $6.name);
  }
 | ID ASSIGNMENT ID DEC INT DEC {
-    printf("=[] %s, %s, %d\n", $1, $3, $5);
+    printf("=[] %s, %s, %s\n", $1, $3, $5);
 }
 
 m_exp:
@@ -128,11 +131,11 @@ INT {
     $$.name = name;
     $$.value = $1;
  }
-| SUB INT { 
+| NEG INT { 
     char *name = genTempName();
 
     printf(". %s\n", name);
-    printf("= %s, %s\n", name, $2);
+    printf("= %s, -%s\n", name, $2);
 
     $$.name = name;
     $$.value = -$2;
@@ -249,9 +252,8 @@ RETURN L_P cond R_P {
  }
 
 array_dec: DEC integer DEC ID {
-    printf("at array declaration\n");
     printf(".[] %s, ", $4);
-    printf("%s\n", $2);
+    printf("%s\n", $2.value);
 }
 
 while:
@@ -274,6 +276,9 @@ rout:
 ROUT L_P cond R_P { 
     printf(".> %s\n", $3.name);
  }
+| ROUT L_P ID DEC INT DEC R_P {
+    printf(".[]> %s, %s\n", $3, $5);
+}
 
 break:
 BREAK { printf("break -> BREAK \n"); }
