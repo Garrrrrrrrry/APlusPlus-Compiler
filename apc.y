@@ -135,7 +135,7 @@ INT {
     char *name = genTempName();
 
     printf(". %s\n", name);
-    printf("= %s, -%s\n", name, $2);
+    printf("- %s, 0, %s\n", name, $2);
 
     $$.name = name;
     $$.value = -$2;
@@ -226,8 +226,7 @@ equality: L_P equality R_P { $$.name = $2.name; }
     $$.name = $1.name;
 }
 
-function_dec:
-DEC ID L_P param R_P GROUPING stmts { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
+function_dec: DEC ID L_P param R_P GROUPING { printf("func %s\n", $2); } stmts SEMICOLON SEMICOLON { printf("endfunc\n"); } {}
 
 function_call:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
