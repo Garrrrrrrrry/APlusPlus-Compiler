@@ -21,8 +21,9 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+                    { return INT; }
+{DIGIT}+                    { yylval.num = strdup(yytext); return INT; }
 "#"                         { return DEC; }
+"-"                         { return NEG; }
 "="                         { return ASSIGNMENT; }
 ";"                         { return SEMICOLON; }
 "add"                       { return ADD; }
@@ -39,8 +40,8 @@ ID [a-zA-Z]
 "ne"                        { return NE; }
 "leq"                       { return LEQ; }
 "geq"                       { return GEQ; }
-"and"                       { return AND; }
-"or"                        { return OR; }
+"&&"                        { return AND; }
+"||"                        { return OR; }
 "stop"                      { return BREAK; }
 "when"                      { return WHILE; }
 "?"                         { return IF; }
@@ -52,7 +53,7 @@ ID [a-zA-Z]
 "aout"                      { return ROUT; }
 "return"                    { return RETURN; }
 "|".*"|"                    {  }
-{ID}+                       { return ID; }
+{ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }
 [ \t*\r*]                   /* NOP */
