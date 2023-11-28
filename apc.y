@@ -40,7 +40,7 @@
 
 program: { printf("func main\n"); } stmts { printf("endfunc\n"); } {}
 
-stmts: stmts stmt {}
+stmts: stmt stmts{}
 | stmt {}
 
 stmt:
@@ -131,7 +131,7 @@ INT {
     printf("= %s, %s\n", name, $1);
 
     $$.name = name;
-    $$.value = $1;
+    $$.value = (void *)(intptr_t)$1;
  }
 | NEG INT { 
     char *name = genTempName();
@@ -140,7 +140,7 @@ INT {
     printf("- %s, 0, %s\n", name, $2);
 
     $$.name = name;
-    $$.value = -$2;
+    $$.value = (void *)(intptr_t)$2;
  }
 | ID { 
     char *name = genTempName();
@@ -152,6 +152,7 @@ INT {
     $$.name = name;
     $$.value = $1;
  }
+| array_access { printf("integer -> array_access \n"); }
 
 cond: L_P cond R_P { $$.name = $2.name; }
 | cond OR cond { 
@@ -228,7 +229,8 @@ equality: L_P equality R_P { $$.name = $2.name; }
     $$.name = $1.name;
 }
 
-function_dec: DEC ID L_P param R_P GROUPING { printf("func %s\n", $2); } stmts SEMICOLON SEMICOLON { printf("endfunc\n"); } {}
+function_dec:
+DEC ID L_P param R_P GROUPING program { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
 
 function_call:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
@@ -256,13 +258,10 @@ array_dec: DEC integer DEC ID {
     printf(".[] %s, ", $4);
     printf("%s\n", $2.value);
 }
-<<<<<<< HEAD
 
 array_access: ID S_COND m_exp E_COND { 
     printf("array_access -> ID S_COND m_exp E_COND \n"); 
 }
-=======
->>>>>>> 71d4ab111393b61d2576fa5131ce0f74dd1ce17d
 
 while:
 WHILE S_COND cond E_COND GROUPING stmts { printf("while -> WHILE S_COND cond E_COND GROUPING program \n"); }
