@@ -23,6 +23,7 @@ ID [a-zA-Z]
 
 {DIGIT}+                    { yylval.num = strdup(yytext); return INT; }
 "#"                         { return DEC; }
+"-"                         { return NEG; }
 "="                         { return ASSIGNMENT; }
 ";"                         { return SEMICOLON; }
 "add"                       { return ADD; }
@@ -39,8 +40,8 @@ ID [a-zA-Z]
 "ne"                        { return NE; }
 "leq"                       { return LEQ; }
 "geq"                       { return GEQ; }
-"and"                       { return AND; }
-"or"                        { return OR; }
+"&&"                        { return AND; }
+"||"                        { return OR; }
 "stop"                      { return BREAK; }
 "when"                      { return WHILE; }
 "?"                         { return IF; }
