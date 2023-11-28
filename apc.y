@@ -76,6 +76,15 @@ int_dec: DEC ID ASSIGNMENT cond {
         }
     }
     VecPush(&vecVar, $2);
+    i = 0;
+    for (; i < vecVar.len; ++i){
+        if (0 == strcmp(vecVar.data[i], $4.name)){
+            VecPush(&vec, vec.data[i]);
+                printf(". %s\n", $2);
+                printf("= %s, %s\n", $2, vec.data[i]); 
+                exit(0);
+        }
+    }
     VecPush(&vec, $4.name);
     printf(". %s\n", $2);
     printf("= %s, %s\n", $2, $4.name); 
@@ -115,15 +124,24 @@ ID ASSIGNMENT cond {
     
     //check for declared variable
     int i = 0;
-    for (; i < vecVar.len; ++i){
-        if (0 == strcmp(vecVar.data[i], $1)){
+    int j = 0;
+    int error = 1;
+    for (; i < vecVar.len; ++i){ //for all variable names
+        if (0 == strcmp(vecVar.data[i], $1)){   //if variable is equal to id
+            for(; j < vecVar.len; ++j){         //for all variable names
+                if (0 == strcmp(vecVar.data[i], $3.name)){ 
+                    vec.data[i] = vec.data[j];
+                }
+                
+            }
             vec.data[i] = $3.name;
-            printf("= %s, %s\n", $1, $3.name);
-            exit(0);
+            printf("= %s, %s\n", $1, vec.data[i]);
+            error = 0;
         }
     }
-    fprintf(stderr, "Assignment of undeclared variable %s\n", $1);
-    exit(-1);
+    if(error){
+        fprintf(stderr, "Assignment of undeclared variable %s\n", $1);
+    }
  }
 | ID DEC INT DEC ASSIGNMENT cond { 
     printf("[]= %s, %s, %s\n", $1, $3, $6.name);
@@ -330,7 +348,7 @@ RIN L_P cond R_P {
  }
 
 rout:
-ROUT L_P cond R_P { printf(".> %s\n", $3); }
+ROUT L_P cond R_P { printf(".> %s\n", $3.value); }
 | ROUT L_P ID DEC INT DEC R_P {
     printf(".[]> %s, %s\n", $3, $5);
 }
