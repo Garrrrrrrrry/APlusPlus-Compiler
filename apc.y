@@ -17,6 +17,17 @@
 
     typedef struct { char *name; char *value; } VarData;
 
+    typedef struct { char **data; size_t len; } Vec;
+    static void VecPush(Vec *vec, char *cstring) {
+        if ( !(vec->data = realloc (vec->data, sizeof(char *)*(vec->len + 1)))){
+            printf("bad_alloc\n"); exit(-1);
+        }
+        vec->data[vec->len++] = cstring;
+    }
+
+    static Vec vec;
+    static Vec vecVar;
+
 %}
 
 %token INT S_COND E_COND WHILE GROUPING SEMICOLON ID DEC RETURN COMMA BREAK IF ELIF RIN ROUT COMMENT NEG
@@ -56,17 +67,81 @@ int_dec SEMICOLON { }
 | break SEMICOLON { printf("stmt -> break SEMICOLON \n"); }
 
 int_dec: DEC ID ASSIGNMENT cond { 
+    //check for dups
+    int i = 0;
+    for (; i < vecVar.len; ++i){
+        if (0 == strcmp(vecVar.data[i], $2)){
+            fprintf(stderr,"Variable %s already declared; exiting.\n", $2); 
+            exit(-1);
+        }
+    }
+    VecPush(&vecVar, $2);
+    i = 0;
+    for (; i < vecVar.len; ++i){
+        if (0 == strcmp(vecVar.data[i], $4.name)){
+            VecPush(&vec, vec.data[i]);
+                printf(". %s\n", $2);
+                printf("= %s, %s\n", $2, vec.data[i]); 
+                exit(0);
+        }
+    }
+    VecPush(&vec, $4.name);
     printf(". %s\n", $2);
     printf("= %s, %s\n", $2, $4.name); 
     }
 | DEC int_assign {}
 
-int_assign: int_assign COMMA ID { printf(". %s\n", $3); }
-| ID { printf(". %s\n", $1); }
+int_assign: int_assign COMMA ID 
+{   
+    //check for dups
+    int i = 0;
+    for (; i < vecVar.len; ++i){
+        if (0 == strcmp(vecVar.data[i], $3)){
+            fprintf(stderr, "Variable %s already declared; exiting.\n", $3); 
+            exit(-1);
+        }
+    }
+    VecPush(&vecVar, $3);
+    VecPush(&vec, "0");
+    printf(". %s\n", $3); 
+    }
+| ID { 
+    //check for dups
+    int i = 0;
+    for (; i < vecVar.len; ++i){
+        if (0 == strcmp(vecVar.data[i], $1)){
+            fprintf(stderr, "Variable %s already declared; exiting.\n", $1); 
+            exit(-1);
+        }
+    }
+    VecPush(&vecVar, $1);
+    VecPush(&vec, "0");
+    printf(". %s\n", $1); 
+    }
 
 assign:
 ID ASSIGNMENT cond { 
-    printf("= %s, %s\n", $1, $3.name);
+    
+    //check for declared variable
+    int i = 0;
+    int j = 0;
+    int error = 1;
+    for (; i < vecVar.len; ++i){ //for all variable names
+        if (0 == strcmp(vecVar.data[i], $1)){   //if variable is equal to id
+            for(; j < vecVar.len; ++j){         //for all variable names
+                if (0 == strcmp(vecVar.data[i], $3.name)){ 
+                    vec.data[i] = vec.data[j];
+                }
+                
+            }
+            vec.data[i] = $3.name;
+            printf("= %s, %s\n", $1, vec.data[i]);
+            error = 0;
+        }
+    }
+    if(error){
+        fprintf(stderr, "Assignment of undeclared variable %s\n", $1);
+    }
  }
 | ID DEC INT DEC ASSIGNMENT cond { 
     printf("[]= %s, %s, %s\n", $1, $3, $6.name);
@@ -272,9 +347,7 @@ RIN L_P cond R_P {
  }
 
 rout:
-ROUT L_P cond R_P { 
-    printf(".> %s\n", $3.name);
- }
+ROUT L_P cond R_P { printf(".> %s\n", $3.value); }
 | ROUT L_P ID DEC INT DEC R_P {
     printf(".[]> %s, %s\n", $3, $5);
 }
