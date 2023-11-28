@@ -75,7 +75,18 @@ ID ASSIGNMENT cond {
 | ID ASSIGNMENT ID DEC INT DEC {
     printf("=[] %s, %s, %s\n", $1, $3, $5);
 }
-| array_access ASSIGNMENT m_exp { printf("assign -> array_access EQ m_exp \n"); }
+| ID S_COND m_exp E_COND ASSIGNMENT m_exp { 
+    char *name = genTempName();
+
+    printf(". %s\n", name);
+    printf("[]= %s, %s, %s\n", $1, $3, $6);
+}
+| ID ASSIGNMENT ID S_COND m_exp E_COND {
+    char *name = genTempName();
+
+    printf(". %s\n", name);
+    printf("=[] %s, %s, %s\n", $1, $3, $5);
+}
 
 m_exp:
 integer {
@@ -152,7 +163,14 @@ INT {
     $$.name = name;
     $$.value = $1;
  }
-| array_access { printf("integer -> array_access \n"); }
+| ID S_COND m_exp E_COND { 
+    char *name = genTempName();
+
+    printf(". %s\n", name);
+    printf("=[] %s, %s, %s\n", name, $1, $3);
+
+    $$.name = name;
+ }
 
 cond: L_P cond R_P { $$.name = $2.name; }
 | cond OR cond { 
@@ -254,13 +272,9 @@ RETURN L_P cond R_P {
     printf("ret 0\n");
  }
 
-array_dec: DEC integer DEC ID {
-    printf(".[] %s, ", $4);
-    printf("%s\n", $2.value);
-}
-
-array_access: ID S_COND m_exp E_COND { 
-    printf("array_access -> ID S_COND m_exp E_COND \n"); 
+array_dec: DEC S_COND m_exp E_COND ID {
+    printf(".[] %s, ", $5);
+    printf("%s\n", $3.value);
 }
 
 while:

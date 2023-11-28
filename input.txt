@@ -1,3 +1,8 @@
 |testing|
 #y = 5 add 5;
 aout(y);
+#[3] arr;
+|[]= dst, index, src|
+arr[1] = 1;
+|=[] dst, src, index|
+# dsc = arr[1];
