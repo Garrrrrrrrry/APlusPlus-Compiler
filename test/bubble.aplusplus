@@ -1,6 +1,6 @@
 # bubbleSort(#[] arr, # n):
+	#[5] arr;
     # i, j, swapped;
-
 	i = 0;
 	when[i lt (n sub 1)]:
 		swapped = 0;

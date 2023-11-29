@@ -1,0 +1,26 @@
+|integer vars|
+# a;
+# b, c;
+|one-dim arrays|
+#[3] arr;
+|assignment|
+arr[3] = 1;
+# dsc = arr[1];
+|arithmetic ops|
+a = a add 1;
+a = a sub 1;
+a = a pro 8;
+a = a div 2;
+a = a mod 2;
+|relational ops|
+b = 0 lt 1;
+b = b gt 0;
+b = b ne 1;
+b = b leq 2;
+b = b geq 2;
+b = b and 0;
+b = b or 0;
+|read write|
+aout(dsc);
+aout(a);
+aout(b);

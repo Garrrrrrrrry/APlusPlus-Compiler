@@ -11,7 +11,7 @@
       c = a add b;
       a = b;
       b = c;
-      n = n sub 1;
+      # n = n sub 1;
     ;
   ;
   return(c);
