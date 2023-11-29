@@ -40,8 +40,8 @@ ID [a-zA-Z]
 "ne"                        { return NE; }
 "leq"                       { return LEQ; }
 "geq"                       { return GEQ; }
-"&&"                        { return AND; }
-"||"                        { return OR; }
+"and"                        { return AND; }
+"or"                        { return OR; }
 "stop"                      { return BREAK; }
 "when"                      { return WHILE; }
 "?"                         { return IF; }
