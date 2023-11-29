@@ -228,7 +228,7 @@ integer {
     char *name = genTempName();
 
     printf(". %s\n", name);
-    printf("% %s, %s, %s\n", name, $1.name, $3.name);
+    printf("%% %s, %s, %s\n", name, $1.name, $3.name);
 
     $$.name = name;
  }
