@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
-
+    #include <stdlib.h>
+    #include <stdint.h>
     int yylex(void);
     
     int val;
@@ -22,12 +23,12 @@
         if ( !(vec->data = realloc (vec->data, sizeof(char *)*(vec->len + 1)))){
             printf("bad_alloc\n"); exit(-1);
         }
-        vec->data[vec->len++] = cstring;
+        vec->data[vec->len++] = strdup(cstring);
     }
 
     static Vec vec;
     static Vec vecVar;
-
+    static Vec arrayVar;
 %}
 
 %token INT S_COND E_COND WHILE GROUPING SEMICOLON ID DEC RETURN COMMA BREAK IF ELIF RIN ROUT COMMENT NEG
@@ -71,7 +72,7 @@ int_dec: DEC ID ASSIGNMENT cond {
     int i = 0;
     for (; i < vecVar.len; ++i){
         if (0 == strcmp(vecVar.data[i], $2)){
-            fprintf(stderr,"Variable %s already declared; exiting.\n", $2); 
+            fprintf(stderr,"Error line %llu : Variable %s already declared; exiting.\n", current_line, $2);  
             exit(-1);
         }
     }
@@ -97,31 +98,30 @@ int_assign: int_assign COMMA ID
     int i = 0;
     for (; i < vecVar.len; ++i){
         if (0 == strcmp(vecVar.data[i], $3)){
-            fprintf(stderr, "Variable %s already declared; exiting.\n", $3); 
+            fprintf(stderr, "Error line %llu : Variable %s already declared; exiting.\n", current_line, $3); 
             exit(-1);
         }
     }
     VecPush(&vecVar, $3);
     VecPush(&vec, "0");
     printf(". %s\n", $3); 
-    }
+}
 | ID { 
     //check for dups
     int i = 0;
     for (; i < vecVar.len; ++i){
         if (0 == strcmp(vecVar.data[i], $1)){
-            fprintf(stderr, "Variable %s already declared; exiting.\n", $1); 
+            fprintf(stderr, "Error line %llu : Variable %s already declared; exiting.\n", current_line, $1); 
             exit(-1);
         }
     }
     VecPush(&vecVar, $1);
     VecPush(&vec, "0");
     printf(". %s\n", $1); 
-    }
+}
 
 assign:
-ID ASSIGNMENT cond { 
-    
+ID ASSIGNMENT cond {   
     //check for declared variable
     int i = 0;
     int j = 0;
@@ -132,7 +132,6 @@ ID ASSIGNMENT cond {
                 if (0 == strcmp(vecVar.data[i], $3.name)){ 
                     vec.data[i] = vec.data[j];
                 }
-                
             }
             vec.data[i] = $3.name;
             printf("= %s, %s\n", $1, vec.data[i]);
@@ -140,7 +139,7 @@ ID ASSIGNMENT cond {
         }
     }
     if(error){
-        fprintf(stderr, "Assignment of undeclared variable %s\n", $1);
+        fprintf(stderr, "Error line %llu : Assignment of undeclared variable %s\n", current_line, $1);
     }
  }
 | ID DEC INT DEC ASSIGNMENT cond { 
@@ -148,6 +147,44 @@ ID ASSIGNMENT cond {
  }
 | ID ASSIGNMENT ID DEC INT DEC {
     printf("=[] %s, %s, %s\n", $1, $3, $5);
+}
+| ID ASSIGNMENT ID S_COND m_exp E_COND {
+    //check for non declared
+    int i = 0;
+    int error = 0;
+    for (; i < arrayVar.len; ++i){
+        if (0 == strcmp(arrayVar.data[i], $3)){
+            error = 1;
+        }
+    }
+    if(error){
+        fprintf(stderr,"Error line %llu : Array %s is not declared; %s\n", current_line, $3);  
+        goto end2;
+    }
+    char *name = genTempName();
+
+    printf(". %s\n", name);
+    printf("=[] %s, %s, %s\n", $1, $3, $5);
+    end2: ;
+}
+| ID S_COND m_exp E_COND ASSIGNMENT m_exp { 
+    //check for non declared
+    int i = 0;
+    int error = 1;
+    for (; i < arrayVar.len; ++i){
+        if (0 == strcmp(arrayVar.data[i], $1)){
+            error = 0;
+        }
+    }
+    if(error){
+        fprintf(stderr,"Error line %llu : Array %s is not declared; %s\n", current_line, $1);  
+        goto end1;
+    }
+    char *name = genTempName();
+
+    printf(". %s\n", name);
+    printf("[]= %s, %s, %s\n", $1, $3, $6);
+    end1: ;
 }
 
 m_exp:
@@ -191,7 +228,7 @@ integer {
     char *name = genTempName();
 
     printf(". %s\n", name);
-    printf("% %s, %s, %s\n", name, $1.name, $3.name);
+    printf("%% %s, %s, %s\n", name, $1.name, $3.name);
 
     $$.name = name;
  }
@@ -204,7 +241,7 @@ INT {
     printf("= %s, %s\n", name, $1);
 
     $$.name = name;
-    $$.value = $1;
+    $$.value = (void *)(intptr_t)$1;
  }
 | NEG INT { 
     char *name = genTempName();
@@ -213,7 +250,7 @@ INT {
     printf("- %s, 0, %s\n", name, $2);
 
     $$.name = name;
-    $$.value = -$2;
+    $$.value = (void *)(intptr_t)$2;
  }
 | ID { 
     char *name = genTempName();
@@ -224,6 +261,14 @@ INT {
 
     $$.name = name;
     $$.value = $1;
+ }
+| ID S_COND m_exp E_COND { 
+    char *name = genTempName();
+
+    printf(". %s\n", name);
+    printf("=[] %s, %s, %s\n", name, $1, $3);
+
+    $$.name = name;
  }
 
 cond: L_P cond R_P { $$.name = $2.name; }
@@ -301,7 +346,8 @@ equality: L_P equality R_P { $$.name = $2.name; }
     $$.name = $1.name;
 }
 
-function_dec: DEC ID L_P param R_P GROUPING { printf("func %s\n", $2); } stmts SEMICOLON SEMICOLON { printf("endfunc\n"); } {}
+function_dec:
+DEC ID L_P param R_P GROUPING stmts { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
 
 function_call:
 ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
@@ -325,9 +371,10 @@ RETURN L_P cond R_P {
     printf("ret 0\n");
  }
 
-array_dec: DEC integer DEC ID {
-    printf(".[] %s, ", $4);
-    printf("%s\n", $2.value);
+array_dec: DEC S_COND m_exp E_COND ID {
+    VecPush(&arrayVar, $5);
+    printf(".[] %s, ", $5);
+    printf("%s\n", $3.value);
 }
 
 while:

@@ -40,8 +40,8 @@ ID [a-zA-Z]
 "ne"                        { return NE; }
 "leq"                       { return LEQ; }
 "geq"                       { return GEQ; }
-"&&"                        { return AND; }
-"||"                        { return OR; }
+"and"                        { return AND; }
+"or"                        { return OR; }
 "stop"                      { return BREAK; }
 "when"                      { return WHILE; }
 "?"                         { return IF; }
@@ -53,6 +53,7 @@ ID [a-zA-Z]
 "aout"                      { return ROUT; }
 "return"                    { return RETURN; }
 "|".*"|"                    {  }
+"|".*                       { fprintf(stderr, "Error line %llu : comments incorrectly defined\n", current_line); }
 {ID}+                       { yylval.str = strdup(yytext); return ID; }
 
 \n                          { ++current_line; current_column = 0; }

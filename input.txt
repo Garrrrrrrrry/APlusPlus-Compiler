@@ -1,15 +1,8 @@
-#x;
-#t, y, z;
-#x = 5;
-x = 6;
-when [x lt 5]:
-#z;
-#a;
-;
-    when [n gt 1]:
-      c = a add b;
-      a = b;
-      b = c;
-      n = n sub 1;
-    ;
-return c;
+|testing|
+#y = 5 add 5;
+aout(y);
+#[3] arr;
+|[]= dst, index, src|
+arr[1] = 1;
+|=[] dst, src, index|
+# dsc = arr[1];
