@@ -394,9 +394,7 @@ RIN L_P cond R_P {
  }
 
 rout:
-ROUT L_P cond R_P { 
-    printf(".> %s\n", $3.name);
- }
+ROUT L_P cond R_P { printf(".> %s\n", $3.value); }
 | ROUT L_P ID DEC INT DEC R_P {
     printf(".[]> %s, %s\n", $3, $5);
 }
