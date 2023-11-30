@@ -4,7 +4,7 @@
 |one-dim arrays|
 #[3] arr;
 |assignment|
-arr[3] = 1;
+arr[1] = 1;
 # dsc = arr[1];
 |arithmetic ops|
 a = a add 1;
