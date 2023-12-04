@@ -6,8 +6,7 @@
     int yylex(void);
     
     int val;
-    bool flipFlop = true;
-    bool flopFlip = true;
+    int whileCount = 0;
 
     void yyerror(char const *err) {
         fprintf(stderr, "parse problem at line %llu, col %llu\n", current_line, current_column); 
@@ -25,32 +24,26 @@
         return strdup(buff);
     }
 
-    static char* beginWhileLoop() {
-        static unsigned long counter;
-        if(flopFlip) {
-            static char buff[4096]; sprintf(buff, "beginloop%llu", counter);
-            flopFlip = false;
-            return strdup(buff);
-        }
-        else {
-            static char buff[4096]; sprintf(buff, "beginloop%llu", counter++);
-            flopFlip = true;
-            return strdup(buff);
-        }
+    static char* beginWhileLoopBot() {
+        whileCount--;
+        static char buff[4096]; sprintf(buff, "beginloop%llu", whileCount);
+        return strdup(buff);
+    }
+    static char* beginWhileLoopTop() {
+        static char buff[4096]; sprintf(buff, "beginloop%llu", whileCount);
+        return strdup(buff);
     }
 
-    static char* endWhileLoop() {
-        static unsigned long counter;
-        if(flipFlop) {
-            static char buff[4096]; sprintf(buff, "endloop%llu", counter);
-            flipFlop = false;
-            return strdup(buff);
-        }
-        else {
-            static char buff[4096]; sprintf(buff, "endloop%llu", counter++);
-            flipFlop = true;
-            return strdup(buff);
-        }
+    static char* endWhileLoopTop() {
+        static char buff[4096]; sprintf(buff, "endloop%llu", whileCount);
+        whileCount++;
+        return strdup(buff);
+    }
+
+    static char* endWhileLoopBot() {
+
+        static char buff[4096]; sprintf(buff, "endloop%llu", whileCount);
+        return strdup(buff);
     }
 
 
@@ -417,17 +410,17 @@ array_dec: DEC S_COND m_exp E_COND ID {
 
 while:
 WHILE {
-    char *begin = beginWhileLoop();
+    char *begin = beginWhileLoopTop();
     printf(": %s\n", begin);
     } S_COND cond E_COND GROUPING { 
     char *body = whileLoopBodyCount();
-    char *end = endWhileLoop();
+    char *end = endWhileLoopTop();
     printf("?:= %s, %s\n", body, $4);
     printf(":= %s\n", end);
     printf(": %s\n", body);
  } stmts SEMICOLON {
-    char *begin = beginWhileLoop();
-    char *end = endWhileLoop();
+    char *begin = beginWhileLoopBot();
+    char *end = endWhileLoopBot();
 
     printf(":= %s\n", begin);
     printf(": %s\n", end);
