@@ -9,6 +9,7 @@
     
     int val;
     int whileCount = 0;
+    char *global_name_sub = "";
     const unsigned int MAX_LENGTH = 4096;
 
     void yyerror(char const *err) {
@@ -17,7 +18,8 @@
 
     static char* genTempName() {
         static unsigned long counter;
-        static char buff[4096]; sprintf(buff, "temp%lu", counter++);
+        static char buff[4096];
+        snprintf(buff, sizeof(buff), "temp%lu", counter++);
         return strdup(buff);
     }
 
@@ -65,6 +67,11 @@
     static Vec vec;
     static Vec vecVar;
     static Vec arrayVar;
+    static Vec func;
+    static Vec funcVar;
+
+    int counter = 0;
+    int inFunc = 0;
 %}
 
 %token INT S_COND E_COND WHILE GROUPING SEMICOLON ID DEC RETURN COMMA BREAK IF ELIF RIN ROUT COMMENT NEG
@@ -75,37 +82,33 @@
 %right ASSIGNMENT AND OR
 
 %union{
-    int num;
     char* str;
-    VarData var;
 }
 
-%type<num> INT
-%type<str> ID COMMENT stmt int_dec int_assign program stmts if elif break while assign return array_dec
-%type<var> integer m_exp equality cond
+%type<str> param function_call rin rout function_dec INT ID COMMENT if elif stmt int_dec int_assign assign stmts array_dec break return while S_COND E_COND GROUPING m_exp integer cond equality
 %%
 
 program: { printf("func main\n"); } stmts { printf("%sendfunc\n", $2); } {}
 
 stmts: { $$ = "" }
-| stmt stmts { 
+| stmts stmt { 
     char temp_buf[MAX_LENGTH];
     sprintf(temp_buf, "%s%s", $1, $2);
     $$ = strdup(temp_buf);
 }
 
 stmt:
-function_dec SEMICOLON { }
-| while SEMICOLON { }
-| if SEMICOLON { }
-| int_dec SEMICOLON { }
-| assign SEMICOLON { }
-| function_call SEMICOLON { }
-| return SEMICOLON { }
-| array_dec SEMICOLON { }
-| rin SEMICOLON { }
-| rout SEMICOLON { }
-| break SEMICOLON { }
+function_dec SEMICOLON { $$ = $1 }
+| while SEMICOLON { $$ = $1 }
+| if SEMICOLON { $$ = $1 }
+| int_dec SEMICOLON { $$ = $1 }
+| assign SEMICOLON { $$ = $1 }
+| function_call SEMICOLON { $$ = $1 }
+| array_dec SEMICOLON { $$ = $1 }
+| rin SEMICOLON { $$ = $1 }
+| rout SEMICOLON { $$ = $1 }
+| break SEMICOLON { $$ = $1 }
+| return SEMICOLON { $$ = $1 }
 
 int_dec: DEC ID ASSIGNMENT cond { 
     //check for dups
@@ -119,7 +122,7 @@ int_dec: DEC ID ASSIGNMENT cond {
     VecPush(&vecVar, $2);
     i = 0;
     for (; i < vecVar.len; ++i){
-        if (0 == strcmp(vecVar.data[i], $4.name)){
+        if (0 == strcmp(vecVar.data[i], $4)){
             VecPush(&vec, vec.data[i]);
 
                 char temp_buf[MAX_LENGTH];
@@ -130,11 +133,12 @@ int_dec: DEC ID ASSIGNMENT cond {
                 exit(0);
         }
     }
-    VecPush(&vec, $4.name);
+    VecPush(&vec, $4);
 
     char temp_buf[MAX_LENGTH];
     sprintf(temp_buf, ". %s\n", $2);
-    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", $2, $4);
+    sprintf(temp_buf + strlen(temp_buf), "%s", $4);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", $2, global_name_sub);
     $$ = strdup(temp_buf);
     }
 | DEC int_assign { $$ = $2; }
@@ -151,9 +155,8 @@ int_assign: int_assign COMMA ID
     }
     VecPush(&vecVar, $3);
     VecPush(&vec, "0");
-
     char temp_buf[MAX_LENGTH];
-    sprintf(temp_buf, ". %s\n", $3);
+    sprintf(temp_buf, "%s. %s\n", $1, $3);
     $$ = strdup(temp_buf);
 }
 | ID { 
@@ -182,28 +185,34 @@ ID ASSIGNMENT cond {
     for (; i < vecVar.len; ++i){ //for all variable names
         if (0 == strcmp(vecVar.data[i], $1)){   //if variable is equal to id
             for(; j < vecVar.len; ++j){         //for all variable names
-                if (0 == strcmp(vecVar.data[i], $3.name)){ 
+                if (0 == strcmp(vecVar.data[i], $3)){ 
                     vec.data[i] = vec.data[j];
                 }
             }
-            vec.data[i] = $3.name;
-
+            vec.data[i] = $3;
+            /*
             char temp_buf[MAX_LENGTH];
             sprintf(temp_buf, "= %s, %s\n", $1, vec.data[i]);
             $$ = strdup(temp_buf);
-
+            */
             error = 0;
         }
     }
     if(error){
         fprintf(stderr, "Error line %llu : Assignment of undeclared variable %s\n", current_line, $1);
     }
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "%s", $3);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", $1, strdup(global_name_sub));
+    $$ = strdup(temp_buf);
  }
 | ID DEC INT DEC ASSIGNMENT cond { 
-    printf("[]= %s, %s, %s\n", $1, $3, $6.name);
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "[]= %s, %s, %s\n", $1, $3, $6);
+    $$ = strdup(temp_buf);
  }
 | ID ASSIGNMENT ID DEC INT DEC {
-
     char temp_buf[MAX_LENGTH];
     sprintf(temp_buf, "=[] %s, %s, %s\n", $1, $3, $5);
     $$ = strdup(temp_buf);
@@ -211,19 +220,18 @@ ID ASSIGNMENT cond {
 | ID ASSIGNMENT ID S_COND m_exp E_COND {
     //check for non declared
     int i = 0;
-    int error = 0;
+    int error = 1;
     for (; i < arrayVar.len; ++i){
         if (0 == strcmp(arrayVar.data[i], $3)){
-            error = 1;
+            error = 0;
         }
     }
     if(error){
         fprintf(stderr,"Error line %llu : Array %s is not declared; %s\n", current_line, $3);  
     }
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("=[] %s, %s, %s\n", $1, $3, $5);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "=[] %s, %s, %s\n", $1, $3, $5);
+    $$ = strdup(temp_buf);
 }
 | ID S_COND m_exp E_COND ASSIGNMENT m_exp { 
     //check for non declared
@@ -239,192 +247,251 @@ ID ASSIGNMENT cond {
     }
     char *name = genTempName();
     
-    printf(". %s\n", name);
-    printf("[]= %s, %s, %s\n", $1, $3, $6);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "[]= %s, %s, %s\n", $1, $3, $6);
+    $$ = strdup(temp_buf);
 }
 
 m_exp:
 integer {
-    $$.value = $1.value;
+    $$ = $1;
 }
 | L_P m_exp R_P { $$ = $2; }
 | m_exp ADD m_exp { 
-    char *name = genTempName();
+    char *one = genTempName(), *two = genTempName(), *sum = genTempName();
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", one);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", two);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", sum);
 
-    printf(". %s\n", name);
-    printf("+ %s, %s, %s\n", name, $1.name, $3.name);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", one, $1);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", two, $3);
 
-    $$.name = name;
+    sprintf(temp_buf + strlen(temp_buf), "+ %s, %s, %s\n", sum, one, two);
+    global_name_sub = strdup(sum);
+    $$ = strdup(temp_buf);
  }
 | m_exp SUB m_exp { 
-    char *name = genTempName();
+    char *one = genTempName(), *two = genTempName(), *sum = genTempName();
+    char temp_buf[MAX_LENGTH];
 
-    printf(". %s\n", name);
-    printf("- %s, %s, %s\n", name, $1.name, $3.name);
+    sprintf(temp_buf, ". %s\n", one);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", two);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", sum);
 
-    $$.name = name;
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", one, $1);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", two, $3);
+
+    sprintf(temp_buf + strlen(temp_buf), "- %s, %s, %s\n", sum, one, two);
+    global_name_sub = strdup(sum);
+    $$ = strdup(temp_buf);
  }
 | m_exp MULT m_exp { 
-    char *name = genTempName();
+    char *one = genTempName(), *two = genTempName(), *sum = genTempName();
+    char temp_buf[MAX_LENGTH];
 
-    printf(". %s\n", name);
-    printf("* %s, %s, %s\n", name, $1.name, $3.name);
+    sprintf(temp_buf, ". %s\n", one);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", two);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", sum);
 
-    $$.name = name;
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", one, $1);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", two, $3);
+    sprintf(temp_buf + strlen(temp_buf), "* %s, %s, %s\n", sum, one, two);
+    global_name_sub = sum;
+    $$ = strdup(temp_buf);
  }
 | m_exp DIV m_exp { 
-    char *name = genTempName();
+    char *one = genTempName(), *two = genTempName(), *sum = genTempName();
+    char temp_buf[MAX_LENGTH];
 
-    printf(". %s\n", name);
-    printf("/ %s, %s, %s\n", name, $1.name, $3.name);
+    sprintf(temp_buf, ". %s\n", one);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", two);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", sum);
 
-    $$.name = name;
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", one, $1);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", two, $3);
+    sprintf(temp_buf + strlen(temp_buf), "/ %s, %s, %s\n", sum, one, two);
+    global_name_sub = strdup(sum);
+    $$ = strdup(temp_buf);
  }
 | m_exp MOD m_exp { 
-    char *name = genTempName();
+    char *one = genTempName(), *two = genTempName(), *sum = genTempName();
+    char temp_buf[MAX_LENGTH];
 
-    printf(". %s\n", name);
-    printf("%% %s, %s, %s\n", name, $1.name, $3.name);
+    sprintf(temp_buf, ". %s\n", one);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", two);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", sum);
 
-    $$.name = name;
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", one, $1);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", two, $3);
+    sprintf(temp_buf + strlen(temp_buf), "%% %s, %s, %s\n", sum, one, two);
+    global_name_sub = strdup(sum);
+    $$ = strdup(temp_buf);
  }
 
 integer:
 INT { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("= %s, %s\n", name, $1);
-
-    $$.name = name;
-    $$.value = (void *)(intptr_t)$1;
- }
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "%s", $1);
+    $$ = strdup(temp_buf);
+}
 | NEG INT { 
     char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("- %s, 0, %s\n", name, $2);
-
-    $$.name = name;
-    $$.value = (void *)(intptr_t)$2;
- }
-| ID { 
-    char *name = genTempName();
-
-
-    printf(". %s\n", name);
-    printf("= %s, %s\n", name, $1);
-
-    $$.name = name;
-    $$.value = $1;
- }
-| ID S_COND m_exp E_COND { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("=[] %s, %s, %s\n", name, $1, $3);
-
-    $$.name = name;
- }
-
-cond: L_P cond R_P { $$.name = $2.name; }
-| cond OR cond { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("|| %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
-    
- }
-| cond AND cond { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("&& %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
- }
-| equality {
-    $$.name = $1.name;
-}
-
-equality: L_P equality R_P { $$.name = $2.name; }
-| equality LT equality { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("< %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
- }
-| equality EQ equality { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("== %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
- }
-| equality GT equality { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("> %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
- }
-| equality NE equality { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("!= %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
- }
-| equality LEQ equality { 
-    char *name = genTempName();
-
-    printf(". %s\n", name);
-    printf("<= %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
- }
-| equality GEQ equality { 
-    char *name = genTempName();
-
-    //$$.name = name;
- }
- | m_exp {
-    $$.name = $1.name;
-}
-
-function_dec:
-DEC ID L_P param R_P GROUPING stmts { printf("function_dec -> DEC ID L_P param R_P GROUPING program \n"); }
-
-function_call:
-ID L_P param R_P { printf("function_call -> ID L_P param R_P \n"); }
-
-param: { printf("param -> epsilon \n"); }
-| DEC ID { printf("param -> DEC ID \n"); }
-| DEC ID COMMA multiparam { printf("param -> DEC ID COMMA multiparam \n"); }
-| DEC S_COND E_COND ID { printf("param -> DEC S_COND E_COND ID \n"); }
-| DEC S_COND E_COND ID COMMA multiparam { printf("param -> DEC S_COND E_COND ID COMMA multiparam \n"); }
-
-multiparam: DEC ID { printf("multiparam -> DEC ID \n"); }
-| DEC ID COMMA multiparam { printf("multiparam -> DEC ID COMMA multiparam \n"); }
-| DEC S_COND E_COND ID { printf("multiparam -> DEC S_COND E_COND ID \n"); }
-| DEC S_COND E_COND ID COMMA multiparam { printf("multiparam -> DEC S_COND E_COND ID COMMA multiparam \n"); }
-
-return:
-RETURN L_P cond R_P { 
     char temp_buf[MAX_LENGTH];
-    sprintf(temp_buf, "ret %s\n", $3);
+    sprintf(temp_buf, ". %s\n", name);
+    sprintf(temp_buf + strlen(temp_buf), "- %s, 0, %s\n", name, $2);
     $$ = strdup(temp_buf);
  }
-| RETURN L_P R_P { 
+| ID { 
+    $$ = $1;
+}
+| ID S_COND m_exp E_COND { 
+    char *name = genTempName();
     char temp_buf[MAX_LENGTH];
-    sprintf(temp_buf, "ret 0\n");
+    sprintf(temp_buf, ". %s\n", name);
+    sprintf(temp_buf + strlen(temp_buf), "=[] %s, %s, %s\n", name, $1, $3);
+    $$ = strdup(temp_buf);
+ }
+
+cond: L_P cond R_P { $$ = $2; }
+    | cond OR cond {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n", name);
+        sprintf(temp_buf + strlen(temp_buf), "|| %s, %s, %s\n", name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | cond AND cond {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n", name);
+        sprintf(temp_buf + strlen(temp_buf), "&& %s, %s, %s\n", name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | equality {
+        $$ = $1;
+    }
+
+equality: L_P equality R_P { $$ = $2; }
+    | equality LT equality {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+            sprintf(temp_buf, "%s", $3);
+        sprintf(temp_buf + strlen(temp_buf), ". %s\n< %s, %s, %s\n", name, name, $1, global_name_sub);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | equality EQ equality {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n== %s, %s, %s\n", name, name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | equality GT equality {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n> %s, %s, %s\n", name, name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | equality NE equality {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n!= %s, %s, %s\n", name, name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | equality LEQ equality {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n<= %s, %s, %s\n", name, name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | equality GEQ equality {
+        char *name = genTempName();
+        char temp_buf[MAX_LENGTH];
+        sprintf(temp_buf, ". %s\n>= %s, %s, %s\n", name, name, $1, $3);
+        global_name_sub = strdup(name);
+        $$ = strdup(temp_buf);
+    }
+    | m_exp {
+        $$ = $1;
+    }
+
+function_dec:
+DEC ID L_P param R_P GROUPING stmts{ 
+    //check for dup functions
+    int i = 0;
+    int funcDefinition = 0;
+    for (; i < func.len; ++i){
+        if (0 == strcmp(func.data[i], $2)){
+            fprintf(stderr,"Error line %llu : Function %s already declared; exiting.\n", current_line, $2);  
+            exit(-1);
+        }
+    }
+    VecPush(&func, $2);
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "func %s\n", $2);
+    sprintf(temp_buf + strlen(temp_buf), "%s", $7);
+    sprintf(temp_buf + strlen(temp_buf), "endfunc\n");
+    $$ = strdup(temp_buf);
+}
+
+function_call:
+ID L_P param_pass R_P { 
+    int found = 0, i = 0;
+    for (; i < func.len; ++i) {
+        if (strcmp(func.data[i], $1) == 0) {
+            found = 1;
+            break;
+        }
+    }
+    if (!found) {
+        fprintf(stderr, "Error line %llu : Access to undeclared function %s; exiting.\n", current_line, $1);
+    }
+    char* name = genTempName();
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", name);
+    sprintf(temp_buf + strlen(temp_buf), "call %s, %s\n", $1, name);
+    $$ = strdup(temp_buf);
+}
+
+param_pass: 
+    m_exp {
+        printf("param %s\n", $1);
+    }
+    | param_pass COMMA m_exp {
+        printf("param %s\n", $3);
+    }
+
+param: { $$ = "" }
+| DEC ID { 
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", $2);
+    $$ = strdup(temp_buf);
+ }
+| DEC ID COMMA param { 
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", $2);
+    sprintf(temp_buf + strlen(temp_buf), ". %s\n", $4);
+    $$ = strdup(temp_buf);
+ }
+| DEC S_COND E_COND ID { 
+    VecPush(&arrayVar, $4);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ".[] %s, %s\n", $4, "1");
+    $$ = strdup(temp_buf);
+ }
+| DEC S_COND E_COND ID COMMA param { 
+    VecPush(&arrayVar, $4);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ".[] %s, %s\n", $4, "1");
+    sprintf(temp_buf + strlen(temp_buf), "%s", $6);
     $$ = strdup(temp_buf);
  }
 
@@ -432,6 +499,9 @@ array_dec:
 DEC S_COND m_exp E_COND ID {
     VecPush(&arrayVar, $5);
     char temp_buf[MAX_LENGTH];
+    if(atoi(strdup($3)) <= 0){
+        fprintf(stderr, "Error line %llu : Declaration of array %s with size <= 0 \n", current_line, $5);
+    }
     sprintf(temp_buf, ".[] %s, %s\n", $5, $3);
     $$ = strdup(temp_buf);
 }
@@ -443,9 +513,9 @@ WHILE S_COND cond E_COND GROUPING stmts{
     char temp_buf[MAX_LENGTH];
     sprintf(temp_buf, ": %s\n", begin);
 
-    char* condition = genTempName();
+    sprintf(temp_buf + strlen(temp_buf), "%s", $3);
+    char* condition = strdup(global_name_sub);
     char* inverse_cond = genTempName();
-    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", condition, $3);
     sprintf(temp_buf + strlen(temp_buf), "! %s, %s\n", inverse_cond, condition);
     
     sprintf(temp_buf + strlen(temp_buf), "?:= %s, %s\n", end, inverse_cond); //if cond is false, goto end
@@ -459,14 +529,17 @@ WHILE S_COND cond E_COND GROUPING stmts{
 if:
 IF S_COND cond E_COND GROUPING stmts elif { 
     char* end = "if_end", * final = "if_final_end";
-    char* condition = genTempName();
-    char* inverse_cond = genTempName();
-
     char temp_buf[MAX_LENGTH];
-    sprintf(temp_buf, "= %s, %s\n", condition, $3);
+
+    sprintf(temp_buf, "%s", $3);
+    char* condition = strdup(global_name_sub);
+
+    char* inverse_cond = genTempName();
     sprintf(temp_buf + strlen(temp_buf), "! %s, %s\n", inverse_cond, condition);
+
     sprintf(temp_buf + strlen(temp_buf), "?:= %s, %s\n", end, inverse_cond);
-    sprintf(temp_buf + strlen(temp_buf), "Testing if stmts: %s", $6);
+    sprintf(temp_buf + strlen(temp_buf), "%s", $6);
+
     sprintf(temp_buf + strlen(temp_buf), ":= %s\n", final);
     sprintf(temp_buf + strlen(temp_buf), ": %s\n", end);
     sprintf(temp_buf + strlen(temp_buf), "%s", $7);
@@ -475,15 +548,16 @@ IF S_COND cond E_COND GROUPING stmts elif {
 }
 elif: { $$ = ""; }
 | ELIF S_COND cond E_COND GROUPING stmts elif { 
-    char* end = "elseif_end", * final = "if_final_end";
-    char* condition = genTempName();
-    char* inverse_cond = genTempName();
-
+    char* end = "if_end", * final = "if_final_end";
     char temp_buf[MAX_LENGTH];
-    sprintf(temp_buf, "= %s, %s\n", condition, $3);
+    sprintf(temp_buf, "%s", $3);
+    char *condition = strdup(global_name_sub);
+    char* inverse_cond = genTempName();
     sprintf(temp_buf + strlen(temp_buf), "! %s, %s\n", inverse_cond, condition);
+
     sprintf(temp_buf + strlen(temp_buf), "?:= %s, %s\n", end, inverse_cond);
     sprintf(temp_buf + strlen(temp_buf), "%s", $6);
+
     sprintf(temp_buf + strlen(temp_buf), ":= %s\n", final);
     sprintf(temp_buf + strlen(temp_buf), ": %s\n", end);
     sprintf(temp_buf + strlen(temp_buf), "%s", $7);
@@ -496,9 +570,15 @@ RIN L_P cond R_P {
  }
 
 rout:
-ROUT L_P cond R_P { printf(".> %s\n", $3); }
+ROUT L_P cond R_P { 
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ".> %s\n", $3);
+    $$ = strdup(temp_buf);
+}
 | ROUT L_P ID DEC INT DEC R_P {
-    printf(".[]> %s, %s\n", $3, $5);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ".[]> %s, %s\n", $3, $5);
+    $$ = strdup(temp_buf);
 }
 
 break: 
@@ -508,5 +588,18 @@ BREAK {
     sprintf(temp_buf, ":= %s\n", final);
     $$ = strdup(temp_buf);
 }
+
+return:
+RETURN L_P cond R_P { 
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "ret %s\n", $3);
+    $$ = strdup(temp_buf);
+ }
+| RETURN L_P R_P { 
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "ret 0\n");
+    $$ = strdup(temp_buf);
+ }
+
 
 %%

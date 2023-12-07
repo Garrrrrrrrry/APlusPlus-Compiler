@@ -1,16 +1,24 @@
 # bubbleSort(#[] arr, # n):
 	#[5] arr;
     # i, j, swapped;
-	i = 0;
+	# sum;
+	i = i add 0;
 	when[i lt (n sub 1)]:
-		swapped = 0;
-		j = 0;
-		when[j lt n sub i sub 1]:
+		swapped = 0 add 0;
+		j = 0 add 0;
+		# num = n sub i;
+		# numm = num sub 1;
+		when[j lt numm]:
 			j = j add 1;
-			?[arr[j] gt arr[j add 1]]:
+			# condition = j add 1;
+			# arrnum = arr[condition];
+			# arrnumm = arr[j];
+			?[arrnumm gt arrnum]:
 				# temp = arr[j];
-				arr[j] = arr[j add 1];
-				arr[j add 1] = temp;
+				sum = j add 1;
+				# tempnum = arr[sum];
+				arr[j] = tempnum;
+				arr[sum] = temp;
 				swapped = 1;
 			;
 		;

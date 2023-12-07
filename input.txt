@@ -1,10 +1,7 @@
-#n = 2;
+#n = n add 2;
 when [n gt 1]:
-    ?(n eq 1):
-        ret(0);
-    ;
     # c = a add b;
-    # a = b;
-    # b = c;
+    # a = b add 0;
+    # b = c add 0;
     n = n sub 1;
 ;

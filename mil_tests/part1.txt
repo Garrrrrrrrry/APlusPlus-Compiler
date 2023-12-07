@@ -5,7 +5,8 @@
 #[3] arr;
 |assignment|
 arr[1] = 1;
-# dsc = arr[1];
+# dsc;
+dsc = arr[1];
 |arithmetic ops|
 a = a add 1;
 a = a sub 1;

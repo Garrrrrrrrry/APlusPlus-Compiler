@@ -21,7 +21,7 @@ ID [a-zA-Z]
 /* lexing rules go down there */
 %%
 
-{DIGIT}+                    { yylval.num = strdup(yytext); return INT; }
+{DIGIT}+                    { yylval.str = strdup(yytext); return INT; }
 "#"                         { return DEC; }
 "-"                         { return NEG; }
 "="                         { return ASSIGNMENT; }

@@ -1,20 +1,22 @@
 # Fibonacci (# n):
-  # a = 0;
-  # b = 1;
+  # n;
+  # a = a add 0;
+  # b = b add 1;
   # c;
-  # one = 1;
+  # one = one add 1;
   ?[n eq 1]:
     return(a);
-  >[n eq 2]:
+  ;
+  ?[n eq 2]:
     return(b);
-  >[one eq 1]:
+  ;
+  ?[one eq 1]:
     when [n gt 1]:
       c = a add b;
-      a = b;
-      b = c;
-      # n = n sub 1;
+      a = b add 0;
+      b = c add 0;
+      n = n sub 1;
     ;
   ;
   return(c);
 ;
-

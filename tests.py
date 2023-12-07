@@ -1,7 +1,7 @@
 import subprocess
 
-input_files = ["input.txt", "test/bubble.aplusplus", "test/fib.aplusplus", "mil_tests/part1.txt", "mil_tests/part1_errors.txt"]
-output_files = ["output.txt", "test/output_bubble.txt", "test/output_fib.txt", "mil_tests/output_part1.txt", "mil_tests/output_part1_errors.txt"]
+input_files = ["input.txt", "test/bubble.aplusplus", "test/fib.aplusplus", "mil_tests/part1.txt", "mil_tests/full_errors.txt"]
+output_files = ["output.txt", "test/output_bubble.txt", "test/output_fib.txt", "mil_tests/output_part1.txt", "mil_tests/output_full_errors.txt"]
 
 for input_file, output_file in zip(input_files, output_files):
     with open(input_file, 'r', encoding="utf-8") as infile:

@@ -1,6 +1,0 @@
-|checking all errors|
-s = 1;
-|missing extra comment ending
-# s;
-arr[1] = 1;
-# s;
