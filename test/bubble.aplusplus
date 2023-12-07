@@ -11,16 +11,13 @@
 				# temp = arr[j];
 				arr[j] = arr[j add 1];
 				arr[j add 1] = temp;
-
-
 				swapped = 1;
 			;
 		;
 		i = i add 1;
 	;
- 
-        ?[swapped eq 0]:
-            stop;
-		;
+	?[swapped eq 0]:
+		stop;
+	;
 	return();
 ;

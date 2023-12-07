@@ -2,11 +2,12 @@
   # a = 0;
   # b = 1;
   # c;
+  # one = 1;
   ?[n eq 1]:
     return(a);
   >[n eq 2]:
     return(b);
-  >[1]:
+  >[one eq 1]:
     when [n gt 1]:
       c = a add b;
       a = b;

@@ -1,12 +1,15 @@
 %{
+    #define _GNU_SOURCE
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdint.h>
     #include <stdbool.h>
+    
     int yylex(void);
     
     int val;
     int whileCount = 0;
+    const unsigned int MAX_LENGTH = 4096;
 
     void yyerror(char const *err) {
         fprintf(stderr, "parse problem at line %llu, col %llu\n", current_line, current_column); 
@@ -14,35 +17,37 @@
 
     static char* genTempName() {
         static unsigned long counter;
-        static char buff[4096]; sprintf(buff, "temp%llu", counter++);
+        static char buff[4096]; sprintf(buff, "temp%lu", counter++);
         return strdup(buff);
     }
 
     static char* whileLoopBodyCount() {
         static unsigned long counter;
-        static char buff[4096]; sprintf(buff, "loopbody%llu", counter++);
+        static char buff[4096]; sprintf(buff, "loopbody%lu", counter++);
         return strdup(buff);
     }
 
     static char* beginWhileLoopBot() {
         whileCount--;
-        static char buff[4096]; sprintf(buff, "beginloop%llu", whileCount);
+        static char buff[4096]; sprintf(buff, "beginloop%lu", whileCount);
         return strdup(buff);
     }
     static char* beginWhileLoopTop() {
-        static char buff[4096]; sprintf(buff, "beginloop%llu", whileCount);
+        static char buff[4096]; sprintf(buff, "beginloop%lu", whileCount);
         return strdup(buff);
     }
 
     static char* endWhileLoopTop() {
-        static char buff[4096]; sprintf(buff, "endloop%llu", whileCount);
+        static char buff[4096]; 
+        sprintf(buff, "endloop%lu", whileCount);
         whileCount++;
         return strdup(buff);
     }
 
     static char* endWhileLoopBot() {
 
-        static char buff[4096]; sprintf(buff, "endloop%llu", whileCount);
+        static char buff[4096]; 
+        sprintf(buff, "endloop%lu", whileCount);
         return strdup(buff);
     }
 
@@ -76,24 +81,28 @@
 }
 
 %type<num> INT
-%type<str> ID COMMENT
+%type<str> ID COMMENT stmt int_dec int_assign program stmts if elif break while assign return array_dec
 %type<var> integer m_exp equality cond
 %%
 
-program: { printf("func main\n"); } stmts { printf("endfunc\n"); } {}
+program: { printf("func main\n"); } stmts { printf("%sendfunc\n", $2); } {}
 
-stmts: stmts stmt {}
-| stmt {}
+stmts: { $$ = "" }
+| stmt stmts { 
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "%s%s", $1, $2);
+    $$ = strdup(temp_buf);
+}
 
 stmt:
-int_dec SEMICOLON { }
+function_dec SEMICOLON { }
+| while SEMICOLON { }
+| if SEMICOLON { }
+| int_dec SEMICOLON { }
 | assign SEMICOLON { }
-| function_dec SEMICOLON { }
 | function_call SEMICOLON { }
 | return SEMICOLON { }
 | array_dec SEMICOLON { }
-| while { }
-| if SEMICOLON { }
 | rin SEMICOLON { }
 | rout SEMICOLON { }
 | break SEMICOLON { }
@@ -112,16 +121,23 @@ int_dec: DEC ID ASSIGNMENT cond {
     for (; i < vecVar.len; ++i){
         if (0 == strcmp(vecVar.data[i], $4.name)){
             VecPush(&vec, vec.data[i]);
-                printf(". %s\n", $2);
-                printf("= %s, %s\n", $2, vec.data[i]); 
+
+                char temp_buf[MAX_LENGTH];
+                sprintf(temp_buf, ". %s\n", $2);
+                sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", $2, vec.data[i]);
+                $$ = strdup(temp_buf);
+
                 exit(0);
         }
     }
     VecPush(&vec, $4.name);
-    printf(". %s\n", $2);
-    printf("= %s, %s\n", $2, $4.name); 
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", $2);
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", $2, $4);
+    $$ = strdup(temp_buf);
     }
-| DEC int_assign {}
+| DEC int_assign { $$ = $2; }
 
 int_assign: int_assign COMMA ID 
 {   
@@ -135,7 +151,10 @@ int_assign: int_assign COMMA ID
     }
     VecPush(&vecVar, $3);
     VecPush(&vec, "0");
-    printf(". %s\n", $3); 
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", $3);
+    $$ = strdup(temp_buf);
 }
 | ID { 
     //check for dups
@@ -148,7 +167,10 @@ int_assign: int_assign COMMA ID
     }
     VecPush(&vecVar, $1);
     VecPush(&vec, "0");
-    printf(". %s\n", $1); 
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ". %s\n", $1);
+    $$ = strdup(temp_buf);
 }
 
 assign:
@@ -165,7 +187,11 @@ ID ASSIGNMENT cond {
                 }
             }
             vec.data[i] = $3.name;
-            printf("= %s, %s\n", $1, vec.data[i]);
+
+            char temp_buf[MAX_LENGTH];
+            sprintf(temp_buf, "= %s, %s\n", $1, vec.data[i]);
+            $$ = strdup(temp_buf);
+
             error = 0;
         }
     }
@@ -177,7 +203,10 @@ ID ASSIGNMENT cond {
     printf("[]= %s, %s, %s\n", $1, $3, $6.name);
  }
 | ID ASSIGNMENT ID DEC INT DEC {
-    printf("=[] %s, %s, %s\n", $1, $3, $5);
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "=[] %s, %s, %s\n", $1, $3, $5);
+    $$ = strdup(temp_buf);
 }
 | ID ASSIGNMENT ID S_COND m_exp E_COND {
     //check for non declared
@@ -190,13 +219,11 @@ ID ASSIGNMENT cond {
     }
     if(error){
         fprintf(stderr,"Error line %llu : Array %s is not declared; %s\n", current_line, $3);  
-        goto end2;
     }
     char *name = genTempName();
 
     printf(". %s\n", name);
     printf("=[] %s, %s, %s\n", $1, $3, $5);
-    end2: ;
 }
 | ID S_COND m_exp E_COND ASSIGNMENT m_exp { 
     //check for non declared
@@ -209,13 +236,11 @@ ID ASSIGNMENT cond {
     }
     if(error){
         fprintf(stderr,"Error line %llu : Array %s is not declared; %s\n", current_line, $1);  
-        goto end1;
     }
     char *name = genTempName();
-
+    
     printf(". %s\n", name);
     printf("[]= %s, %s, %s\n", $1, $3, $6);
-    end1: ;
 }
 
 m_exp:
@@ -368,10 +393,7 @@ equality: L_P equality R_P { $$.name = $2.name; }
 | equality GEQ equality { 
     char *name = genTempName();
 
-    printf(". %s\n", name);
-    printf(">= %s, %s, %s\n", name, $1.name, $3.name);
-
-    $$.name = name;
+    //$$.name = name;
  }
  | m_exp {
     $$.name = $1.name;
@@ -396,56 +418,95 @@ multiparam: DEC ID { printf("multiparam -> DEC ID \n"); }
 
 return:
 RETURN L_P cond R_P { 
-    printf("ret %s\n", $3.name);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "ret %s\n", $3);
+    $$ = strdup(temp_buf);
  }
 | RETURN L_P R_P { 
-    printf("ret 0\n");
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "ret 0\n");
+    $$ = strdup(temp_buf);
  }
 
-array_dec: DEC S_COND m_exp E_COND ID {
+array_dec: 
+DEC S_COND m_exp E_COND ID {
     VecPush(&arrayVar, $5);
-    printf(".[] %s, ", $5);
-    printf("%s\n", $3.value);
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ".[] %s, %s\n", $5, $3);
+    $$ = strdup(temp_buf);
 }
 
 while:
-WHILE {
+WHILE S_COND cond E_COND GROUPING stmts{
     char *begin = beginWhileLoopTop();
-    printf(": %s\n", begin);
-    } S_COND cond E_COND GROUPING { 
-    char *body = whileLoopBodyCount();
     char *end = endWhileLoopTop();
-    printf("?:= %s, %s\n", body, $4);
-    printf(":= %s\n", end);
-    printf(": %s\n", body);
- } stmts SEMICOLON {
-    char *begin = beginWhileLoopBot();
-    char *end = endWhileLoopBot();
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ": %s\n", begin);
 
-    printf(":= %s\n", begin);
-    printf(": %s\n", end);
- }
+    char* condition = genTempName();
+    char* inverse_cond = genTempName();
+    sprintf(temp_buf + strlen(temp_buf), "= %s, %s\n", condition, $3);
+    sprintf(temp_buf + strlen(temp_buf), "! %s, %s\n", inverse_cond, condition);
+    
+    sprintf(temp_buf + strlen(temp_buf), "?:= %s, %s\n", end, inverse_cond); //if cond is false, goto end
+    sprintf(temp_buf + strlen(temp_buf), "%s", $6);
+    sprintf(temp_buf + strlen(temp_buf), ":= %s\n", begin); //goto begin to loop
+    sprintf(temp_buf + strlen(temp_buf), ": %s\n", end);
+
+    $$ = strdup(temp_buf);
+}
 
 if:
-IF S_COND cond E_COND GROUPING stmts elif { printf("if -> IF S_COND cond E_COND GROUPING program elif \n"); }
-|IF IF S_COND cond E_COND GROUPING stmts elif { yyerror("error: double if  \n"); }
+IF S_COND cond E_COND GROUPING stmts elif { 
+    char* end = "if_end", * final = "if_final_end";
+    char* condition = genTempName();
+    char* inverse_cond = genTempName();
 
-elif:
- { printf("elif -> epsilon \n"); }
-| ELIF S_COND cond E_COND GROUPING stmts elif { printf("elif -> ELIF S_COND cond E_COND GROUPING program elif \n"); }
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "= %s, %s\n", condition, $3);
+    sprintf(temp_buf + strlen(temp_buf), "! %s, %s\n", inverse_cond, condition);
+    sprintf(temp_buf + strlen(temp_buf), "?:= %s, %s\n", end, inverse_cond);
+    sprintf(temp_buf + strlen(temp_buf), "Testing if stmts: %s", $6);
+    sprintf(temp_buf + strlen(temp_buf), ":= %s\n", final);
+    sprintf(temp_buf + strlen(temp_buf), ": %s\n", end);
+    sprintf(temp_buf + strlen(temp_buf), "%s", $7);
+    sprintf(temp_buf + strlen(temp_buf), ": %s\n", final);
+    $$ = strdup(temp_buf);
+}
+elif: { $$ = ""; }
+| ELIF S_COND cond E_COND GROUPING stmts elif { 
+    char* end = "elseif_end", * final = "if_final_end";
+    char* condition = genTempName();
+    char* inverse_cond = genTempName();
+
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, "= %s, %s\n", condition, $3);
+    sprintf(temp_buf + strlen(temp_buf), "! %s, %s\n", inverse_cond, condition);
+    sprintf(temp_buf + strlen(temp_buf), "?:= %s, %s\n", end, inverse_cond);
+    sprintf(temp_buf + strlen(temp_buf), "%s", $6);
+    sprintf(temp_buf + strlen(temp_buf), ":= %s\n", final);
+    sprintf(temp_buf + strlen(temp_buf), ": %s\n", end);
+    sprintf(temp_buf + strlen(temp_buf), "%s", $7);
+    $$ = strdup(temp_buf);
+}
 
 rin:
 RIN L_P cond R_P { 
-    printf(".< %s\n", $3.name);
+    printf(".< %s\n", $3);
  }
 
 rout:
-ROUT L_P cond R_P { printf(".> %s\n", $3.value); }
+ROUT L_P cond R_P { printf(".> %s\n", $3); }
 | ROUT L_P ID DEC INT DEC R_P {
     printf(".[]> %s, %s\n", $3, $5);
 }
 
-break:
-BREAK { printf("break -> BREAK \n"); }
+break: 
+BREAK { 
+    char* final = "if_final_end";
+    char temp_buf[MAX_LENGTH];
+    sprintf(temp_buf, ":= %s\n", final);
+    $$ = strdup(temp_buf);
+}
 
 %%
