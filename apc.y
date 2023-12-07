@@ -2,9 +2,11 @@
     #include <stdio.h>
     #include <stdlib.h>
     #include <stdint.h>
+    #include <stdbool.h>
     int yylex(void);
     
     int val;
+    int whileCount = 0;
 
     void yyerror(char const *err) {
         fprintf(stderr, "parse problem at line %llu, col %llu\n", current_line, current_column); 
@@ -15,6 +17,35 @@
         static char buff[4096]; sprintf(buff, "temp%llu", counter++);
         return strdup(buff);
     }
+
+    static char* whileLoopBodyCount() {
+        static unsigned long counter;
+        static char buff[4096]; sprintf(buff, "loopbody%llu", counter++);
+        return strdup(buff);
+    }
+
+    static char* beginWhileLoopBot() {
+        whileCount--;
+        static char buff[4096]; sprintf(buff, "beginloop%llu", whileCount);
+        return strdup(buff);
+    }
+    static char* beginWhileLoopTop() {
+        static char buff[4096]; sprintf(buff, "beginloop%llu", whileCount);
+        return strdup(buff);
+    }
+
+    static char* endWhileLoopTop() {
+        static char buff[4096]; sprintf(buff, "endloop%llu", whileCount);
+        whileCount++;
+        return strdup(buff);
+    }
+
+    static char* endWhileLoopBot() {
+
+        static char buff[4096]; sprintf(buff, "endloop%llu", whileCount);
+        return strdup(buff);
+    }
+
 
     typedef struct { char *name; char *value; } VarData;
 
@@ -60,12 +91,12 @@ int_dec SEMICOLON { }
 | function_dec SEMICOLON { }
 | function_call SEMICOLON { }
 | return SEMICOLON { }
-| array_dec SEMICOLON {  }
-| while SEMICOLON { printf("stmt -> while SEMICOLON \n"); }
-| if SEMICOLON { printf("stmt -> if SEMICOLON \n"); }
-| rin SEMICOLON { printf("stmt -> rin SEMICOLON \n"); }
+| array_dec SEMICOLON { }
+| while { }
+| if SEMICOLON { }
+| rin SEMICOLON { }
 | rout SEMICOLON { }
-| break SEMICOLON { printf("stmt -> break SEMICOLON \n"); }
+| break SEMICOLON { }
 
 int_dec: DEC ID ASSIGNMENT cond { 
     //check for dups
@@ -378,7 +409,22 @@ array_dec: DEC S_COND m_exp E_COND ID {
 }
 
 while:
-WHILE S_COND cond E_COND GROUPING stmts { printf("while -> WHILE S_COND cond E_COND GROUPING program \n"); }
+WHILE {
+    char *begin = beginWhileLoopTop();
+    printf(": %s\n", begin);
+    } S_COND cond E_COND GROUPING { 
+    char *body = whileLoopBodyCount();
+    char *end = endWhileLoopTop();
+    printf("?:= %s, %s\n", body, $4);
+    printf(":= %s\n", end);
+    printf(": %s\n", body);
+ } stmts SEMICOLON {
+    char *begin = beginWhileLoopBot();
+    char *end = endWhileLoopBot();
+
+    printf(":= %s\n", begin);
+    printf(": %s\n", end);
+ }
 
 if:
 IF S_COND cond E_COND GROUPING stmts elif { printf("if -> IF S_COND cond E_COND GROUPING program elif \n"); }
