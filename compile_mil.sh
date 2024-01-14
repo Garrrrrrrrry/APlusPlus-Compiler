@@ -1,0 +1,1 @@
+./mil_run mil_test.mill

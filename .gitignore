@@ -1,2 +1,5 @@
 lex.yy.c
 *.exe
+mil_run
+output_*
+tasks.txt
